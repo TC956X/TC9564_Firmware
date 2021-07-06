@@ -1,7 +1,7 @@
 # Toshiba Electronic Devices & Storage Corporation TC956X PCIe Ethernet Bridge Firmware
 
-Release Date: Mar 26 2021
-Relase Version: V_1.0.0
+Release Date: Jul 05 2021
+Relase Version: V_1.0.1 : Limited-tested version
 
 
 # Introduction:
@@ -21,7 +21,9 @@ The folder contains a Keil project, which is the firmware for PCIe interface.
 
 #  Notes:
 1. Some debugging counters are available:
-    #define  TC956X_M3_DBG_CNT_SIZE   0x2000F800  // Debugging count SRAM area start address
+   #define TC956X_M3_DBG_CNT_START            0x2000F800U
+   #define TC956X_M3_DBG_CNT_SIZE             ( 18U*4U )
+
     /*
     * TC956X_M3_DBG_CNT_START + 4*0:  Reserved
     * TC956X_M3_DBG_CNT_START + 4*1:   Reserved
@@ -47,3 +49,9 @@ The folder contains a Keil project, which is the firmware for PCIe interface.
 
 ## TC956X_Firmware_PCIeBridge_20210326_V1.0.0:
 1. Initial Version
+
+## TC956X_Firmware_PCIeBridge_20210705_V1.0.1:
+1. Used Systick handler instead of Driver kernel timer to process transmitted Tx descriptors.
+2. sprintf, vsprintf APIs replaced with vnsprintf or vnsprintf APIs
+3. CPU Frequency corrected
+4. Note that this release is only a limited test version.

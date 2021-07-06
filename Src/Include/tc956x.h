@@ -25,7 +25,8 @@
 /*! History:
  *  8 Jul 2020  : Initial Version
  *  22 Oct 2020 : EEPROM support
- *  VERSION     : 1.0.0
+ *  05 Jul 2021  : Used Systick handler instead of Driver kernel timer to process transmitted Tx descriptors.
+ *  VERSION      : 1.0.1
  */
 
 #ifndef __TC956X_H__
@@ -58,6 +59,8 @@ MACRO DEFINITION
 #define TC956X_M3_FW_INIT_DONE             0x20007054U      /* Memory for FW init completed */
 #define TC956X_M3_FW_EXIT                  0x20007058U      /* Memory for FW Exit when driver unloaded */
 
+#define TC956X_SW_MSI_TRIGGER_TIME         1000      /* 1 second */
+
 /* TC956X_M3_DBG_CNT_START + 4*0:  Reserved
 * TC956X_M3_DBG_CNT_START + 4*1:   Reserved
 * TC956X_M3_DBG_CNT_START + 4*2:   Reserved
@@ -70,15 +73,17 @@ MACRO DEFINITION
 * TC956X_M3_DBG_CNT_START + 4*12:  WDT Monitor count
 * TC956X_M3_DBG_CNT_START + 4*13:  Reserved
 * TC956X_M3_DBG_CNT_START + 4*14:  Reserved
-* TC956X_M3_DBG_CNT_START + 4*15:  guiM3Ticks
-*   .........................
-* TC956X_M3_DBG_CNT_START + 4*17:  Reserved
+* TC956X_M3_DBG_CNT_START + 4*15:  guiM3Ticks (64bit)
+* TC956X_M3_DBG_CNT_START + 4*16:  guiM3Ticks (64 bit)
+* TC956X_M3_DBG_CNT_START + 4*17:  Tx Timeout for Port0
+* TC956X_M3_DBG_CNT_START + 4*18:  Tx Timeout for Port1
+* TC956X_M3_DBG_CNT_START + 4*19:  Reserved
 */
 
-/* 0x20004000 to 0x2000401C is for Port0, 0x20004020 to 0x2000403C is for Port1 */ 
+/* 0x20004000 to 0x2000401C is for Port0, 0x20004020 to 0x2000403C is for Port1 */
 #define SRAM_TX_PCIE_ADDR_LOC  0x20004000
 
-/* 0x20004040 to 0x2000405C is for Port0, 0x20004060 to 0x2000407C is for Port1 */ 
+/* 0x20004040 to 0x2000405C is for Port0, 0x20004060 to 0x2000407C is for Port1 */
 #define SRAM_RX_PCIE_ADDR_LOC  0x20004040
 
 /* Total bytes for SRAM location size i.e 0x20004100 - 0x20004000 */
@@ -89,6 +94,11 @@ MACRO DEFINITION
 #define XGMAC_MAC_OFFSET1                0x40048000U
 #define XGMAC_DMA_CUR_TxDESC_LADDR(x)   (0x00003144 + (0x80 * (x)))
 #define XGMAC_DMA_CUR_RxDESC_LADDR(x)   (0x0000314C + (0x80 * (x)))
+
+#define XGMAC_MTL_TxQ_DEBUG(x)          (0x00001108 + (0x80 * (x)))
+#define XGMAC_MTL_TxQ_DEBUG_TXQSTS_MASK	(1 << 4)
+#define XGMAC_MTL_TxQ_DEBUG_TXQSTS_SHIFT	(4)
+
 /* M3 registers */
 /* SysTick Ctrl & Status Reg.     */
 #define CPU_REG_NVIC_ST_CTRL           ( *( ( uint32_t * )( 0xE000E010U ) ) )
@@ -96,6 +106,10 @@ MACRO DEFINITION
 #define CPU_REG_NVIC_ST_RELOAD         ( *( ( uint32_t * )( 0xE000E014U ) ) )
 /* System Handlers 12 to 15 Prio. */
 #define CPU_REG_NVIC_SHPRI3            ( *( ( uint32_t * )( 0xE000ED20U ) ) )
+
+#define TC956X_MSIGEN_REG_BASE           0x4000F000U
+#define SW_MSI_SET_PF0                   0x0050U
+#define SW_MSI_SET_PF1                   0x0150U
 
 /* Interrupt registers */
 #define TC956X_INTC_REG_BASE           0x40008000U

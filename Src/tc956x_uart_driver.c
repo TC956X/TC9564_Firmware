@@ -27,8 +27,10 @@
  *  23 Feb 2021  : Macros used for magic numbers
  *                 Removed code for UART interrupt enabling
                    in INTEXTMASK2 and INTINTXMASK2 registers
- *  VERSION     : 1.0.0
+ *  05 Jul 2021  : vsprintf changed to vsnprintf
+ *  VERSION      : 1.0.1
  */
+
 
 /*
  *********************************************************************************************************
@@ -1910,7 +1912,7 @@ int32_t TC956X_Ser_Printf (char *format, ...)
   }
 
   va_start(vArgs, format);
-  (void)vsprintf((char *)buffer, (char const *)format, vArgs);
+  (void)vsnprintf((char *)buffer, 256U, (const char *)format, vArgs);
   va_end(vArgs);
 
   while (buffer[len])

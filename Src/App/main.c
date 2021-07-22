@@ -28,7 +28,8 @@
 *  23 Feb 2021  : Disable Unused clocks,
 *                 Exit Firmware on driver unload
 *  05 Jul 2021  : Used Systick handler instead of Driver kernel timer to process transmitted Tx descriptors.
-*  VERSION      : 1.0.1
+*  22 Jul 2021  : For IPA channel interrupts, clear only interrupt status
+*  VERSION      : 1.0.2
 */
 
 /*
@@ -79,7 +80,7 @@ static void Eeprom_Mac_Read(void);
 static void SysInit(void);
 
 #if ( DEF_ENABLED == TC956X_UART )
-static const FW_Version_t version = {'R', 1, 0, 1};
+static const FW_Version_t version = {'R', 1, 0, 2};
 #endif
 
 #if (DEF_ENABLED == TEST_EEPROM_WRITE_ENABLE)

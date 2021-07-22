@@ -26,7 +26,8 @@
  *  8 Jul 2020  : Initial Version
  *  22 Oct 2020 : EEPROM support
  *  05 Jul 2021  : Used Systick handler instead of Driver kernel timer to process transmitted Tx descriptors.
- *  VERSION      : 1.0.1
+ *  22 Jul 2021  : Dynamic CM3 TAMAP configuration.
+ *  VERSION      : 1.0.2
  */
 
 #ifndef __TC956X_H__
@@ -95,6 +96,20 @@ MACRO DEFINITION
 #define XGMAC_DMA_CUR_TxDESC_LADDR(x)   (0x00003144 + (0x80 * (x)))
 #define XGMAC_DMA_CUR_RxDESC_LADDR(x)   (0x0000314C + (0x80 * (x)))
 
+#define XGMAC_DMA_CH_Status(x)                        (0x00003160 + (0x80 * (x)))
+#define XGMAC_DMA_Int_Enable(x)                       (0x00003138 + (0x80 * (x)))
+#define XGMAC_DMA_STS_TX_TI                           (0x1 << 0)
+#define XGMAC_DMA_STS_TX_TPS                          (0x1 << 1)
+#define XGMAC_DMA_STS_TX_TBU                          (0x1 << 2)
+#define XGMAC_DMA_STS_RX_RI                           (0x1 << 6)
+#define XGMAC_DMA_STS_RX_RBU                          (0x1 << 7)
+#define XGMAC_DMA_STS_RX_RPS                          (0x1 << 8)
+#define XGMAC_DMA_STS_TX_TEB                          (0x7 << 16)
+#define XGMAC_DMA_STS_RX_REB                          (0x7 << 19)
+#define XGMAC_DMA_TX_INT_STS_ALL                      ((XGMAC_DMA_STS_TX_TI) | (XGMAC_DMA_STS_TX_TPS) | \
+                                                        (XGMAC_DMA_STS_TX_TBU) | XGMAC_DMA_STS_TX_TEB)
+#define XGMAC_DMA_RX_INT_STS_ALL                      ((XGMAC_DMA_STS_RX_RI) | (XGMAC_DMA_STS_RX_RBU) | \
+                                                       (XGMAC_DMA_STS_RX_RBU) | (XGMAC_DMA_STS_RX_REB))
 #define XGMAC_MTL_TxQ_DEBUG(x)          (0x00001108 + (0x80 * (x)))
 #define XGMAC_MTL_TxQ_DEBUG_TXQSTS_MASK	(1 << 4)
 #define XGMAC_MTL_TxQ_DEBUG_TXQSTS_SHIFT	(4)

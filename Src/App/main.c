@@ -25,11 +25,9 @@
 /*! History:
 *  8 Jul 2020   : Initial Version
 *  22 Oct 2020  : EEPROM support
-*  23 Feb 2021  : Disable Unused clocks,
+*  23 Feb 2021  : Disable Unused clocks, 
 *                 Exit Firmware on driver unload
-*  05 Jul 2021  : Used Systick handler instead of Driver kernel timer to process transmitted Tx descriptors.
-*  22 Jul 2021  : For IPA channel interrupts, clear only interrupt status
-*  VERSION      : 1.0.2
+*  VERSION      : 1.0.0
 */
 
 /*
@@ -59,10 +57,9 @@ MACRO DEFINITION
 ======================================================================*/
 #define INT_MCUMASK_MASK_ALL        0xFFFFFFFFU
 #define INT_MCUMASK2_MASK           0xFFFF7FFFU
-#define CPU_FREQ                    250000000U
+#define CPU_FREQ                    187500000U
 #define SYS_TICK_PRIO               0x00E00000U
 #define TC956X_GPIO3_OUTPUT         DEF_DISABLED
-#define TC956X_SW_MSI               DEF_ENABLED
 #define TC956X_UART                 DEF_ENABLED
 #define TEST_EEPROM_WRITE_ENABLE    DEF_DISABLED
 #define USE_EEPROM                  DEF_DISABLED
@@ -80,7 +77,7 @@ static void Eeprom_Mac_Read(void);
 static void SysInit(void);
 
 #if ( DEF_ENABLED == TC956X_UART )
-static const FW_Version_t version = {'R', 1, 0, 2};
+static const FW_Version_t version = {'R', 1, 0, 0};
 #endif
 
 #if (DEF_ENABLED == TEST_EEPROM_WRITE_ENABLE)
@@ -90,7 +87,7 @@ static uint8_t eeprom_mac_addr[52] = {0x00,0xEC,0x21,0xE5,0x10,0x4F,0xEA,0xEC,0x
 									  0x30,0xEC,0x21,0xE5,0x16,0x4F,0xEA,0xEC,0x21,0xE5,0x17,0x4F,0xEA};
 #endif
 
-#if (DEF_ENABLED == USE_EEPROM)
+#if (DEF_ENABLED == USE_EEPROM)										
 static uint8_t default_eeprom_mac_addr[48] = {0xEC,0x21,0xE5,0x10,0x4F,0xEA,0xEC,0x21,0xE5,0x11,0x4F,0xEA,
 											  0xEC,0x21,0xE5,0x12,0x4F,0xEA,0xEC,0x21,0xE5,0x13,0x4F,0xEA,
 											  0xEC,0x21,0xE5,0x14,0x4F,0xEA,0xEC,0x21,0xE5,0x15,0x4F,0xEA,
@@ -159,9 +156,6 @@ uint32_t Hw_Reg_Read32 (const uint32_t uiAddr_base,
 */
 void SysTick_Handler (void)
 {
-  volatile uint32_t uiVal  = 0 ;
-  volatile uint32_t uiTxsts;
-
   guiM3Ticks++ ;
 
   *(uint64_t*)( TC956X_M3_DBG_CNT_START + ( TC956X_FIFTEEN * TC956X_FOUR ) ) = guiM3Ticks ;
@@ -175,37 +169,6 @@ void SysTick_Handler (void)
   {
     tc956x_gpio.OutputData(GPIO_THREE, GPIO_LOW);
   }
-#endif
-#if ( DEF_ENABLED == TC956X_SW_MSI )
-
-  /* Systick timer is 1ms. Check for every TC956X_SW_MSI_TRIGGER_TIME ms*/
-  if ((guiM3Ticks % TC956X_SW_MSI_TRIGGER_TIME) == 0)
-  {
-    /* Handle Port0 */
-    uiVal = *(uint32_t*)( TC956X_M3_DBG_CNT_START + ( TC956X_SEVENTEEN * TC956X_FOUR ) );
-    if (uiVal == 1)
-    {
-      uiTxsts = Hw_Reg_Read32( XGMAC_MAC_OFFSET0, XGMAC_MTL_TxQ_DEBUG(0) );
-      uiTxsts = (uiTxsts & XGMAC_MTL_TxQ_DEBUG_TXQSTS_MASK) >> XGMAC_MTL_TxQ_DEBUG_TXQSTS_SHIFT;
-      if(uiTxsts == 0)
-      {
-        Hw_Reg_Write32( TC956X_MSIGEN_REG_BASE, SW_MSI_SET_PF0, TC956X_ONE ) ;
-      }
-    }
-
-  /* Handle Port1 */
-    uiVal = *(uint32_t*)( TC956X_M3_DBG_CNT_START + ( TC956X_EIGHTEEN * TC956X_FOUR ) );
-    if (uiVal == 1)
-    {
-      uiTxsts = Hw_Reg_Read32( XGMAC_MAC_OFFSET1, XGMAC_MTL_TxQ_DEBUG(0) );
-      uiTxsts = (uiTxsts & XGMAC_MTL_TxQ_DEBUG_TXQSTS_MASK) >> XGMAC_MTL_TxQ_DEBUG_TXQSTS_SHIFT;
-      if (uiTxsts == 0)
-      {
-        Hw_Reg_Write32( TC956X_MSIGEN_REG_BASE, SW_MSI_SET_PF1, TC956X_ONE ) ;
-      }
-    }
-  }
-
 #endif
   CM3_Errata_IRQ();
 }
@@ -393,7 +356,7 @@ static void Eeprom_Mac_Write(void)
 #if ( DEF_ENABLED == TC956X_UART )
       TC956X_Ser_Printf("*** MAC address write on EEPROM successful ***\n");
 #endif
-    }
+    }	  
   }
 
   return;
@@ -439,8 +402,8 @@ static void Eeprom_Mac_Read(void)
       *( uint8_t* )( TC956X_M3_MAC_ADDR_START + k ) = default_eeprom_mac_addr[i];
 	    if(k % TC956X_EIGHT == TC956X_FIVE)
         k += TC956X_THREE;
-      else
-        k++;
+      else 
+        k++;      
     }
 #if ( DEF_ENABLED == TC956X_UART )
     TC956X_Ser_Printf("MAC address read from EEPROM failed\n");
@@ -451,19 +414,19 @@ static void Eeprom_Mac_Read(void)
     /* writing MAC address for MAC0*/
     for (i = TC956X_ZERO ; i < eeprom_mac_count; i++) {
 	    count++;
-
+     
 	    if(count == TC956X_SIXTEEN) {
 		    count = TC956X_ZERO;
 		    continue;
 	    }
-
+     
 	    if(count > TC956X_TWELVE)
 		    continue;
-
+     
       *( uint8_t* )( TC956X_M3_MAC_ADDR_START + k ) = eeprom_read_mac_addr[i + 1];
 	    if(k % TC956X_EIGHT == TC956X_FIVE)
         k += TC956X_THREE;
-      else
+      else 
         k++;
     }
 #if ( DEF_ENABLED == TC956X_UART )
@@ -479,7 +442,7 @@ static void Eeprom_Mac_Read(void)
 	    count = TC956X_ZERO;
 	    continue;
 	   }
-
+    
 	   if(count > TC956X_TWELVE)
 	    continue;
 
@@ -532,10 +495,7 @@ int32_t main (void)
     /* clear the count */
     *( uint32_t*)( TC956X_M3_DBG_CNT_START + ( uiCount * TC956X_FOUR ) ) = TC956X_ZERO ;
   }
-
-  *(uint32_t*)( TC956X_M3_DBG_CNT_START + ( TC956X_SEVENTEEN * TC956X_FOUR ) ) = TC956X_ZERO;
-  *(uint32_t*)( TC956X_M3_DBG_CNT_START + ( TC956X_EIGHTEEN * TC956X_FOUR ) ) = TC956X_ZERO;
-
+  
   for ( uiCount = TC956X_ZERO; uiCount < ( SRAM_EVENT_LOC_SIZE / TC956X_FOUR ); uiCount++ )
   {
     /* clear the count */
@@ -545,7 +505,7 @@ int32_t main (void)
 
 #if ( DEF_ENABLED == TC956X_UART )
   *( uint32_t*)(TC956X_M3_DBG_VER_START) = *( uint32_t *)(&version);
-  snprintf(ver_str, 32, "Version %s_%d.%d-%d", (version.rel_dbg == 'R')?"REL":"DBG",
+  sprintf(ver_str, "Version %s_%d.%d-%d", (version.rel_dbg == 'R')?"REL":"DBG",
   version.major, version.minor, version.sub_minor);
 #endif
 
@@ -586,15 +546,15 @@ int32_t main (void)
 #endif
 
   *(uint8_t *) TC956X_M3_FW_INIT_DONE = TC956X_ONE;
-
+  
   while ( true )
   {
     if ( (*(uint32_t *)TC956X_M3_FW_EXIT) == TC956X_TWO )
       break;
-
+    
     __wfi();
   }
-
+  
   /* Disable systick timer */
   CPU_REG_NVIC_ST_CTRL &= ~TC956X_COMMON_ONE;
 
@@ -602,6 +562,6 @@ int32_t main (void)
   Hw_Reg_Write32 ( TC956X_REG_BASE, TC956X_NCLKCTRL0_OFFS, TC956X_CLK_CTRL0_DISABLE ) ;
   Hw_Reg_Write32 ( TC956X_REG_BASE, TC956X_NCLKCTRL1_OFFS, TC956X_CLK_CTRL1_DISABLE ) ;
 
-
+  
 }
 /* End of main */

@@ -23,8 +23,10 @@
  * ========================================================================= */
 
 /*! History:
- *  8 Jul 2020  : Initial Version
+ *  08 Jul 2020  : Initial Version
  *  VERSION     : 1.0.0
+ *  23 Jul 2021  : Enable DMA IPA Offload by default
+ *  VERSION     : 1.0.3
  */
 
 #ifndef _COMMON_H__
@@ -53,7 +55,7 @@
 #define DEF_ENABLED                       1
 #define NULL                              0
 
-//#define DMA_OFFLOAD_ENABLE
+#define DMA_OFFLOAD_ENABLE
 
 #define TC956X_COMMON_ONE                 0x00000001U
 #define TC956X_COMMON_TWO                 0x00000002U

@@ -1,7 +1,7 @@
 # Toshiba Electronic Devices & Storage Corporation TC956X PCIe Ethernet Bridge Firmware
 
-Release Date: Jul 22 2021
-Relase Version: V1.0.2 : Limited-tested version
+Release Date: Jul 23 2021
+Relase Version: V1.0.3 : Limited-tested version
 
 
 # Introduction:
@@ -45,8 +45,8 @@ The folder contains a Keil project, which is the firmware for PCIe interface.
 2. Firmware Version
     #define TC956X_M3_DBG_VER_START      0x2000F900 // Firmware Version SRAM area start address
 
-3. Enable DMA_OFFLOAD_ENABLE macro in \Src\Include\common.h to enable IPA feature
-   By default, DMA_OFFLOAD_ENABLE macro is disabled
+3. Disable DMA_OFFLOAD_ENABLE macro in \Src\Include\common.h to disable IPA feature.
+   By default, DMA_OFFLOAD_ENABLE macro is enabled
 
 # Release Versions:
 
@@ -61,3 +61,6 @@ The folder contains a Keil project, which is the firmware for PCIe interface.
 
 ## TC956X_Firmware_PCIeBridge_20210722_V1.0.2:
 1. For IPA channel interrupts, clear only interrupt status
+
+## TC956X_Firmware_PCIeBridge_20210723_V1.0.3:
+1. Enable DMA IPA offload by default

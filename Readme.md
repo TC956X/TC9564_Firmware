@@ -1,7 +1,7 @@
 # Toshiba Electronic Devices & Storage Corporation TC956X PCIe Ethernet Bridge Firmware
 
-Release Date: Jul 23 2021
-Relase Version: V1.0.3 : Limited-tested version
+Release Date: Sep 23 2021
+Relase Version: V1.0.4 : Limited-tested version
 
 
 # Introduction:
@@ -64,3 +64,7 @@ The folder contains a Keil project, which is the firmware for PCIe interface.
 
 ## TC956X_Firmware_PCIeBridge_20210723_V1.0.3:
 1. Enable DMA IPA offload by default
+
+## TC956X_Firmware_PCIeBridge_20210923_V1.0.4:
+1. Triggering DoreBell only when Transmission/Reception completion
+2. Handling RBU Interrupt at Host Driver and maintaining ethtool statistics

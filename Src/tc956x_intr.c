@@ -27,6 +27,9 @@
 *  VERSION      : 1.0.0
 *  22 Jul 2021  : For IPA channel interrupts, clear only interrupt status
 *  VERSION      : 1.0.2
+*  23 Sep 2021  : 1.Triggering DoreBell only when Transmission/Reception completion
+                  2.Handling RBU Interrupt at Host Driver and maintaining ethtool statistics
+*  VERSION      : 1.0.4
 */
 
 /*******************************************************************************************************
@@ -93,11 +96,15 @@ void EMAC0_TXDMA_IRQHandler (void)
     { 
       uiCurDesc = Hw_Reg_Read32( XGMAC_MAC_OFFSET0, XGMAC_DMA_CUR_TxDESC_LADDR(i) );
 
-      *(uint32_t*)(*( uint32_t*)( SRAM_TX_PCIE_ADDR_LOC + ( i * TC956X_FOUR ) ) ) =  uiCurDesc;
-
       uiIntEn = Hw_Reg_Read32( XGMAC_MAC_OFFSET0, XGMAC_DMA_Int_Enable(i) );
       uiIntSts = Hw_Reg_Read32( XGMAC_MAC_OFFSET0, XGMAC_DMA_CH_Status(i) );
       uiIntSts = ( uiIntEn & uiIntSts & XGMAC_DMA_TX_INT_STS_ALL );
+
+      if(uiIntSts & XGMAC_DMA_STS_TX_TI)
+      {
+        *(uint32_t*)(*( uint32_t*)( SRAM_TX_PCIE_ADDR_LOC + ( i * TC956X_FOUR ) ) ) =  uiCurDesc;
+      }
+
       Hw_Reg_Write32( XGMAC_MAC_OFFSET0, XGMAC_DMA_CH_Status(i), uiIntSts );
     }
   }
@@ -120,11 +127,15 @@ void EMAC0_RXDMA_IRQHandler (void)
     { 
       uiCurDesc = Hw_Reg_Read32( XGMAC_MAC_OFFSET0, XGMAC_DMA_CUR_RxDESC_LADDR(i) );
 
-      *(uint32_t*)(*( uint32_t*)( SRAM_RX_PCIE_ADDR_LOC + ( i * TC956X_FOUR ) ) ) = uiCurDesc;
-
       uiIntEn = Hw_Reg_Read32( XGMAC_MAC_OFFSET0, XGMAC_DMA_Int_Enable(i) );
       uiIntSts = Hw_Reg_Read32( XGMAC_MAC_OFFSET0, XGMAC_DMA_CH_Status(i) );
       uiIntSts = ( uiIntEn & uiIntSts & XGMAC_DMA_RX_INT_STS_ALL );
+
+      if(uiIntSts & XGMAC_DMA_STS_RX_RI)
+      {
+        *(uint32_t*)(*( uint32_t*)( SRAM_RX_PCIE_ADDR_LOC + ( i * TC956X_FOUR ) ) ) =  uiCurDesc;
+      }
+
       Hw_Reg_Write32( XGMAC_MAC_OFFSET0, XGMAC_DMA_CH_Status(i), uiIntSts );
     }
   }
@@ -147,12 +158,16 @@ void EMAC1_TXDMA_IRQHandler (void)
     {
       uiCurDesc = Hw_Reg_Read32( XGMAC_MAC_OFFSET1, XGMAC_DMA_CUR_TxDESC_LADDR(i) );
 
-      *(uint32_t*)(*( uint32_t*)( SRAM_TX_PCIE_ADDR_LOC + ( MAX_DMA_TX_CH * TC956X_FOUR ) + ( i * TC956X_FOUR ) ) ) =  
-                                  uiCurDesc;
-
       uiIntEn = Hw_Reg_Read32( XGMAC_MAC_OFFSET1, XGMAC_DMA_Int_Enable(i) );
       uiIntSts = Hw_Reg_Read32( XGMAC_MAC_OFFSET1, XGMAC_DMA_CH_Status(i) );
       uiIntSts = ( uiIntEn & uiIntSts & XGMAC_DMA_TX_INT_STS_ALL );
+
+      if(uiIntSts & XGMAC_DMA_STS_TX_TI)
+      {
+        *(uint32_t*)(*( uint32_t*)( SRAM_TX_PCIE_ADDR_LOC + ( MAX_DMA_TX_CH * TC956X_FOUR ) + ( i * TC956X_FOUR ) ) ) =  
+                                    uiCurDesc;
+      }
+
       Hw_Reg_Write32( XGMAC_MAC_OFFSET1, XGMAC_DMA_CH_Status(i), uiIntSts );
     }
   }
@@ -172,15 +187,19 @@ void EMAC1_RXDMA_IRQHandler (void)
   for( i = 0; i < MAX_DMA_RX_CH; i++ )
   {
     if( uiData & ( TC956X_ONE << ( i + MACxRXSTS_CH0 ) ) )
-    { 
+    {
       uiCurDesc = Hw_Reg_Read32( XGMAC_MAC_OFFSET1, XGMAC_DMA_CUR_RxDESC_LADDR(i) );
-
-      *(uint32_t*)(*( uint32_t*)( SRAM_RX_PCIE_ADDR_LOC + ( MAX_DMA_RX_CH * TC956X_FOUR ) + ( i * TC956X_FOUR ) ) ) =  
-                                  uiCurDesc;
 
       uiIntEn = Hw_Reg_Read32( XGMAC_MAC_OFFSET1, XGMAC_DMA_Int_Enable(i) );
       uiIntSts = Hw_Reg_Read32( XGMAC_MAC_OFFSET1, XGMAC_DMA_CH_Status(i) );
       uiIntSts = ( uiIntEn & uiIntSts & XGMAC_DMA_RX_INT_STS_ALL );
+
+      if(uiIntSts & XGMAC_DMA_STS_RX_RI)
+      {
+        *(uint32_t*)(*( uint32_t*)( SRAM_RX_PCIE_ADDR_LOC + ( MAX_DMA_RX_CH * TC956X_FOUR ) + ( i * TC956X_FOUR ) ) ) =  
+                                    uiCurDesc;
+      }
+
       Hw_Reg_Write32( XGMAC_MAC_OFFSET1, XGMAC_DMA_CH_Status(i), uiIntSts );
     }
   }

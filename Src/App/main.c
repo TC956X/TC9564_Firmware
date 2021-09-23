@@ -31,6 +31,8 @@
 *  22 Jul 2021  : For IPA channel interrupts, clear only interrupt status
 *  23 Jul 2021  : Enable DMA IPA offload by default
 *  VERSION      : 1.0.3
+*  23 Sep 2021  : Version Update
+*  VERSION      : 1.0.4
 */
 
 /*
@@ -81,7 +83,7 @@ static void Eeprom_Mac_Read(void);
 static void SysInit(void);
 
 #if ( DEF_ENABLED == TC956X_UART )
-static const FW_Version_t version = {'R', 1, 0, 3};
+static const FW_Version_t version = {'R', 1, 0, 4};
 #endif
 
 #if (DEF_ENABLED == TEST_EEPROM_WRITE_ENABLE)

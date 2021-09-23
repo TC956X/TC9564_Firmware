@@ -28,6 +28,8 @@
  *  05 Jul 2021  : Used Systick handler instead of Driver kernel timer to process transmitted Tx descriptors.
  *  22 Jul 2021  : Dynamic CM3 TAMAP configuration.
  *  VERSION      : 1.0.2
+ *  23 Sep 2021  : Handling RBU Interrupt at Host Driver and maintaining ethtool statistics.
+ *  VERSION      : 1.0.4
  */
 
 #ifndef __TC956X_H__
@@ -108,8 +110,8 @@ MACRO DEFINITION
 #define XGMAC_DMA_STS_RX_REB                          (0x7 << 19)
 #define XGMAC_DMA_TX_INT_STS_ALL                      ((XGMAC_DMA_STS_TX_TI) | (XGMAC_DMA_STS_TX_TPS) | \
                                                         (XGMAC_DMA_STS_TX_TBU) | XGMAC_DMA_STS_TX_TEB)
-#define XGMAC_DMA_RX_INT_STS_ALL                      ((XGMAC_DMA_STS_RX_RI) | (XGMAC_DMA_STS_RX_RBU) | \
-                                                       (XGMAC_DMA_STS_RX_RBU) | (XGMAC_DMA_STS_RX_REB))
+#define XGMAC_DMA_RX_INT_STS_ALL                      ((XGMAC_DMA_STS_RX_RI) | /*(XGMAC_DMA_STS_RX_RBU)| */ \
+                                                       (XGMAC_DMA_STS_RX_RPS) | (XGMAC_DMA_STS_RX_REB))
 #define XGMAC_MTL_TxQ_DEBUG(x)          (0x00001108 + (0x80 * (x)))
 #define XGMAC_MTL_TxQ_DEBUG_TXQSTS_MASK	(1 << 4)
 #define XGMAC_MTL_TxQ_DEBUG_TXQSTS_SHIFT	(4)

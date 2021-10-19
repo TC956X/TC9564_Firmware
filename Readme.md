@@ -1,7 +1,7 @@
 # Toshiba Electronic Devices & Storage Corporation TC956X PCIe Ethernet Bridge Firmware
 
-Release Date: Sep 23 2021
-Relase Version: V1.0.4 : Limited-tested version
+Release Date: Oct 19 2021
+Relase Version: V1.0.5 : Limited-tested version
 
 
 # Introduction:
@@ -22,7 +22,7 @@ The folder contains a Keil project, which is the firmware for PCIe interface.
 #  Notes:
 1. Some debugging counters are available:
    #define TC956X_M3_DBG_CNT_START            0x2000F800U
-   #define TC956X_M3_DBG_CNT_SIZE             ( 18U*4U )
+   #define TC956X_M3_DBG_CNT_SIZE             ( 20U*4U )
 
     /*
     * TC956X_M3_DBG_CNT_START + 4*0:  Reserved
@@ -37,9 +37,11 @@ The folder contains a Keil project, which is the firmware for PCIe interface.
     * TC956X_M3_DBG_CNT_START + 4*12:  WDT Monitor count
     * TC956X_M3_DBG_CNT_START + 4*13:  Reserved
     * TC956X_M3_DBG_CNT_START + 4*14:  Reserved
-    * TC956X_M3_DBG_CNT_START + 4*15:  guiM3Ticks
-    *   .........................
-    * TC956X_M3_DBG_CNT_START + 4*17:  Reserved
+    * TC956X_M3_DBG_CNT_START + 4*15:  guiM3Ticks (64bit)
+    * TC956X_M3_DBG_CNT_START + 4*16:  guiM3Ticks (64 bit)
+    * TC956X_M3_DBG_CNT_START + 4*17:  Tx Timeout for Port0
+    * TC956X_M3_DBG_CNT_START + 4*18:  Tx Timeout for Port1
+    * TC956X_M3_DBG_CNT_START + 4*19:  Reserved
     */
 
 2. Firmware Version
@@ -68,3 +70,7 @@ The folder contains a Keil project, which is the firmware for PCIe interface.
 ## TC956X_Firmware_PCIeBridge_20210923_V1.0.4:
 1. Triggering DoreBell only when Transmission/Reception completion
 2. Handling RBU Interrupt at Host Driver and maintaining ethtool statistics
+
+## TC956X_Firmware_PCIeBridge_20211019_V1.0.5:
+1. Updated value of Debug Counters size as per No.of SRAM Debug counters (each counter of 4 Bytes Size).
+2. Resetting all SRAM debug counters to Zeros at common place

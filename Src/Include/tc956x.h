@@ -30,6 +30,8 @@
  *  VERSION      : 1.0.2
  *  23 Sep 2021  : Handling RBU Interrupt at Host Driver and maintaining ethtool statistics.
  *  VERSION      : 1.0.4
+ *  19 Oct 2021  : Updated value of Debug Counters size as per No.of SRAM Debug counters (each counter of 4 Bytes Size).
+ *  VERSION      : 1.0.5
  */
 
 #ifndef __TC956X_H__
@@ -52,7 +54,7 @@ MACRO DEFINITION
 /* Debugging count SRAM area start address */
 #define TC956X_M3_DBG_CNT_START            0x2000F800U      /* DMEM: 0x2000_0000 - 0x2001_0000 */
 /* Debugging count SRAM area size */
-#define TC956X_M3_DBG_CNT_SIZE             ( 18U*4U )
+#define TC956X_M3_DBG_CNT_SIZE             ( 20U*4U )
 
 #define TC956X_M3_DBG_VER_START            0x2000F900
 

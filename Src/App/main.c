@@ -33,6 +33,9 @@
 *  VERSION      : 1.0.3
 *  23 Sep 2021  : Version Update
 *  VERSION      : 1.0.4
+*  19 Oct 2021  : Resetting all SRAM debug counters to Zeros at common place
+                  Version Update
+*  VERSION      : 1.0.5
 */
 
 /*
@@ -83,7 +86,7 @@ static void Eeprom_Mac_Read(void);
 static void SysInit(void);
 
 #if ( DEF_ENABLED == TC956X_UART )
-static const FW_Version_t version = {'R', 1, 0, 4};
+static const FW_Version_t version = {'R', 1, 0, 5};
 #endif
 
 #if (DEF_ENABLED == TEST_EEPROM_WRITE_ENABLE)
@@ -535,9 +538,6 @@ int32_t main (void)
     /* clear the count */
     *( uint32_t*)( TC956X_M3_DBG_CNT_START + ( uiCount * TC956X_FOUR ) ) = TC956X_ZERO ;
   }
-
-  *(uint32_t*)( TC956X_M3_DBG_CNT_START + ( TC956X_SEVENTEEN * TC956X_FOUR ) ) = TC956X_ZERO;
-  *(uint32_t*)( TC956X_M3_DBG_CNT_START + ( TC956X_EIGHTEEN * TC956X_FOUR ) ) = TC956X_ZERO;
 
   for ( uiCount = TC956X_ZERO; uiCount < ( SRAM_EVENT_LOC_SIZE / TC956X_FOUR ); uiCount++ )
   {

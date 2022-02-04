@@ -30,6 +30,8 @@
 *  23 Sep 2021  : 1.Triggering DoreBell only when Transmission/Reception completion
                   2.Handling RBU Interrupt at Host Driver and maintaining ethtool statistics
 *  VERSION      : 1.0.4
+*  04 Feb 2022  : 1.Invoking Doorbell for IPA DMA channels only. Skipped for SW path channels based on MCU mask enabled in the driver.
+*  VERSION      : 1.0.6
 */
 
 /*******************************************************************************************************
@@ -83,15 +85,22 @@ void WDT_IRQHandler (void)
 */
 void EMAC0_TXDMA_IRQHandler (void)
 {
-  uint32_t uiData;
+  uint32_t uiData, uiMask;
   uint32_t i;
   uint32_t uiCurDesc;
   uint32_t uiIntSts, uiIntEn;
 
   uiData = Hw_Reg_Read32( TC956X_INTC_REG_BASE, MAC0STATUS );
-  
+  uiMask = Hw_Reg_Read32( TC956X_INTC_REG_BASE, INTMCUMASK0_OFFS );
+
   for( i = 0; i < MAX_DMA_TX_CH; i++ )
   {
+    /* Skip the channels for which INTMCUMASK interrupt is masked*/
+    if  ( ( uiMask & ( 1 << ( INTMCUMASK_TX_CH0 + i ) ) ) )
+    {
+      continue;
+    }
+
     if( uiData & ( TC956X_ONE << i) )
     { 
       uiCurDesc = Hw_Reg_Read32( XGMAC_MAC_OFFSET0, XGMAC_DMA_CUR_TxDESC_LADDR(i) );
@@ -114,15 +123,22 @@ void EMAC0_TXDMA_IRQHandler (void)
 
 void EMAC0_RXDMA_IRQHandler (void)
 {
-  uint32_t uiData;
+  uint32_t uiData, uiMask;
   uint32_t i;
   uint32_t uiCurDesc;
   uint32_t uiIntSts, uiIntEn;
 
   uiData = Hw_Reg_Read32( TC956X_INTC_REG_BASE, MAC0STATUS ) ;
-  
+  uiMask = Hw_Reg_Read32( TC956X_INTC_REG_BASE, INTMCUMASK0_OFFS );
+
   for(i = 0; i < MAX_DMA_RX_CH; i++)
   {
+    /* Skip the channels for which INTMCUMASK interrupt is masked*/
+    if  ( ( uiMask & ( 1 << ( INTMCUMASK_RX_CH0 + i ) ) ) )
+    {
+      continue;
+    }
+
     if( uiData & ( TC956X_ONE << ( i + MACxRXSTS_CH0 ) ) )
     { 
       uiCurDesc = Hw_Reg_Read32( XGMAC_MAC_OFFSET0, XGMAC_DMA_CUR_RxDESC_LADDR(i) );
@@ -145,15 +161,22 @@ void EMAC0_RXDMA_IRQHandler (void)
 
 void EMAC1_TXDMA_IRQHandler (void)
 {
-  uint32_t uiData;
+  uint32_t uiData, uiMask;
   uint32_t i;
   uint32_t uiCurDesc;
   uint32_t uiIntSts, uiIntEn;
 
   uiData = Hw_Reg_Read32( TC956X_INTC_REG_BASE, MAC1STATUS ) ;
-  
+  uiMask = Hw_Reg_Read32( TC956X_INTC_REG_BASE, INTMCUMASK1_OFFS );
+
   for( i = 0; i < MAX_DMA_TX_CH; i++ )
   {
+    /* Skip the channels for which INTMCUMASK interrupt is masked*/
+    if  ( ( uiMask & ( 1 << ( INTMCUMASK_TX_CH0 + i ) ) ) )
+    {
+      continue;
+    }
+
     if( uiData & ( TC956X_ONE << i ) )
     {
       uiCurDesc = Hw_Reg_Read32( XGMAC_MAC_OFFSET1, XGMAC_DMA_CUR_TxDESC_LADDR(i) );
@@ -177,15 +200,22 @@ void EMAC1_TXDMA_IRQHandler (void)
 
 void EMAC1_RXDMA_IRQHandler (void)
 {
-  uint32_t uiData;
+  uint32_t uiData, uiMask;
   uint32_t i;
   uint32_t uiCurDesc;
   uint32_t uiIntSts, uiIntEn;
 
   uiData = Hw_Reg_Read32( TC956X_INTC_REG_BASE, MAC1STATUS ) ;
-  
+  uiMask = Hw_Reg_Read32( TC956X_INTC_REG_BASE, INTMCUMASK1_OFFS );
+
   for( i = 0; i < MAX_DMA_RX_CH; i++ )
   {
+    /* Skip the channels for which INTMCUMASK interrupt is masked*/
+    if  ( ( uiMask & ( 1 << ( INTMCUMASK_RX_CH0 + i ) ) ) )
+    {
+      continue;
+    }
+
     if( uiData & ( TC956X_ONE << ( i + MACxRXSTS_CH0 ) ) )
     {
       uiCurDesc = Hw_Reg_Read32( XGMAC_MAC_OFFSET1, XGMAC_DMA_CUR_RxDESC_LADDR(i) );

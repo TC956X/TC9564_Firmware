@@ -36,6 +36,8 @@
 *  19 Oct 2021  : Resetting all SRAM debug counters to Zeros at common place
                   Version Update
 *  VERSION      : 1.0.5
+*  04 Feb 2022  : Version Update
+*  VERSION      : 1.0.6
 */
 
 /*
@@ -86,7 +88,7 @@ static void Eeprom_Mac_Read(void);
 static void SysInit(void);
 
 #if ( DEF_ENABLED == TC956X_UART )
-static const FW_Version_t version = {'R', 1, 0, 5};
+static const FW_Version_t version = {'R', 1, 0, 6};
 #endif
 
 #if (DEF_ENABLED == TEST_EEPROM_WRITE_ENABLE)

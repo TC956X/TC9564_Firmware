@@ -1,7 +1,7 @@
 # Toshiba Electronic Devices & Storage Corporation TC956X PCIe Ethernet Bridge Firmware
 
-Release Date: Oct 19 2021
-Relase Version: V1.0.5 : Limited-tested version
+Release Date: Feb 04 2022
+Relase Version: V1.0.6 : Limited-tested version
 
 
 # Introduction:
@@ -74,3 +74,6 @@ The folder contains a Keil project, which is the firmware for PCIe interface.
 ## TC956X_Firmware_PCIeBridge_20211019_V1.0.5:
 1. Updated value of Debug Counters size as per No.of SRAM Debug counters (each counter of 4 Bytes Size).
 2. Resetting all SRAM debug counters to Zeros at common place
+
+## TC956X_Firmware_PCIeBridge_20220204_V1.0.6:
+1. Invoking Doorbell for IPA DMA channels only. Skipped for SW path channels based on MCU mask enabled in the driver.

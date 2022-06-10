@@ -1,7 +1,7 @@
 # Toshiba Electronic Devices & Storage Corporation TC956X PCIe Ethernet Bridge Firmware
 
-Release Date: Feb 04 2022
-Relase Version: V1.0.6 : Limited-tested version
+Release Date: Jun 10 2022
+Relase Version: V1.0.7 : Limited-tested version
 
 
 # Introduction:
@@ -77,3 +77,8 @@ The folder contains a Keil project, which is the firmware for PCIe interface.
 
 ## TC956X_Firmware_PCIeBridge_20220204_V1.0.6:
 1. Invoking Doorbell for IPA DMA channels only. Skipped for SW path channels based on MCU mask enabled in the driver.
+
+## TC956X_Firmware_PCIeBridge_20220610_V1.0.7:
+1. FW will set I2C in slave mode by default. If using EEPROM, then I2C master configuration will used and switched back to I2C slave after completion of EEPROM operation.
+2. Corrected bit settings in ARM_I2C_Uninitialize API.
+

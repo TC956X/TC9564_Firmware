@@ -26,6 +26,8 @@
  *  22 Oct 2020 : Baselined
  *  23 Feb 2021 : Macros used for magic numbers 
  *  VERSION     : 1.0.0
+*  10 Jun 2022  : Configure I2C slave as default mode
+*  VERSION      : 1.0.7
  */
 
 /*
@@ -200,6 +202,12 @@ static int32_t tc956x_I2C_EepromRead (uint32_t addr, uint8_t page_no, uint8_t *d
 * return      \ref Status Error Codes
 */
 
+static int32_t ARM_I2C_ResetAsSlave (void);
+/**
+  \brief       Reset I2C as Slave.
+  \return      \ref Status Error Codes
+*/
+
 static int32_t SetupBusSpeed(uint32_t speed);
 
 /*********************************************************************************************************
@@ -292,7 +300,7 @@ static int32_t ARM_I2C_Uninitialize (void)
   /* NVIC_DisableIRQ(INT_SRC_NBR_I2C_Master); */
 
   reg_value  = hw_reg_read32(CNF_REG_BASE, CNF_REG_NCLKCTRL);
-  reg_value |=  ((uint32_t)TC956X_I2C_ZERO) << I2C_CLK_RST_BIT; /* disable NCLKCTRL for I2C */
+  reg_value &=  ~(((uint32_t)TC956X_I2C_ONE) << I2C_CLK_RST_BIT); /* disable NCLKCTRL for I2C */
   hw_reg_write32(CNF_REG_BASE, CNF_REG_NCLKCTRL, reg_value);
 
   reg_value  = hw_reg_read32(CNF_REG_BASE, CNF_REG_NRSTCTRL);
@@ -747,7 +755,49 @@ static int32_t tc956x_I2C_EepromRead (uint32_t addr, uint8_t page_no, uint8_t *d
 
   /* Start EEPROM read */
   ret = ARM_I2C_MasterReceive(addr, &data[1], num - 1U, false);
-  return ret; 
+  return ret;
+}
+
+/**
+  \fn          int32_t ARM_I2C_ResetAsSlave (void)
+  \brief       Reset I2C as Slave.
+  \return      \ref Status Error Codes
+*/
+
+static int32_t ARM_I2C_ResetAsSlave (void)
+{
+  uint32_t reg_value;
+  uint8_t  cnt;
+
+  if (I2C_INITIALIZED == info->flags)
+  {
+    return ARM_DRIVER_ERROR;
+  }
+
+  /* I2CMEN=0 */
+  reg_value = hw_reg_read32(CNF_REG_BASE, CNF_REG_NFUNCEN0);
+  reg_value = reg_value & ~(((uint32_t)TC956X_I2C_ONE) << I2C_MASTER_ENABLE_BIT);
+  hw_reg_write32(CNF_REG_BASE, CNF_REG_NFUNCEN0, reg_value);
+
+  reg_value = hw_reg_read32(CNF_REG_BASE, CNF_REG_NCLKCTRL);
+  reg_value = reg_value | I2C_CLK_ENABLE;
+  hw_reg_write32(CNF_REG_BASE, CNF_REG_NCLKCTRL, reg_value);
+
+  /* Dummy Read 2 times */
+  hw_reg_read32(CNF_REG_BASE, CNF_REG_NCLKCTRL);
+  hw_reg_read32(CNF_REG_BASE, CNF_REG_NCLKCTRL);
+
+  reg_value  = hw_reg_read32(CNF_REG_BASE, CNF_REG_NRSTCTRL);
+  reg_value &= ~(((uint32_t)TC956X_I2C_ONE) << I2C_CLK_RST_BIT); /* disable NCLKRST for I2C */
+  hw_reg_write32(CNF_REG_BASE, CNF_REG_NRSTCTRL, reg_value);
+
+  for(cnt = TC956X_ZERO; cnt < TC956X_TEN; cnt++)
+  {
+    hw_reg_read32(CNF_REG_BASE, CNF_REG_NCLKCTRL);
+  }
+
+  info->flags = I2C_INITIALIZED;
+  return ARM_DRIVER_OK;
 }
 
 ARM_DRIVER_I2C DRIVER_I2C = {
@@ -765,4 +815,5 @@ ARM_I2C_Control,
 ARM_I2C_GetStatus,
 tc956x_I2C_EepromWrite,
 tc956x_I2C_EepromRead,
+ARM_I2C_ResetAsSlave,
 };

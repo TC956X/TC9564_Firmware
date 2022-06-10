@@ -38,6 +38,9 @@
 *  VERSION      : 1.0.5
 *  04 Feb 2022  : Version Update
 *  VERSION      : 1.0.6
+*  10 Jun 2022  : 1. Configure I2C slave as default mode
+*               : 2. Version Update
+*  VERSION      : 1.0.7
 */
 
 /*
@@ -77,7 +80,10 @@ MACRO DEFINITION
 
 static void Configure_Watchdog(void);
 static void Configure_Systick(void);
+#if (DEF_ENABLED == USE_EEPROM)
 static void I2c_Init(void) ;
+static void I2c_ResetAsSlave(void);
+#endif
 #if (DEF_ENABLED == TEST_EEPROM_WRITE_ENABLE)
 static void Eeprom_Mac_Write(void);
 #endif
@@ -88,7 +94,7 @@ static void Eeprom_Mac_Read(void);
 static void SysInit(void);
 
 #if ( DEF_ENABLED == TC956X_UART )
-static const FW_Version_t version = {'R', 1, 0, 6};
+static const FW_Version_t version = {'R', 1, 0, 7};
 #endif
 
 #if (DEF_ENABLED == TEST_EEPROM_WRITE_ENABLE)
@@ -324,6 +330,7 @@ static void SysInit (void)
 *  Return Value:    None
 *  Limitation  :    None
 */
+#if (DEF_ENABLED == USE_EEPROM)
 static void I2c_Init(void)
 {
   int32_t ret = 0;
@@ -360,6 +367,7 @@ static void I2c_Init(void)
   return;
 }
 /* End of I2c_Init */
+#endif
 
 #if (DEF_ENABLED == TEST_EEPROM_WRITE_ENABLE)
 /*
@@ -516,6 +524,57 @@ static void Eeprom_Mac_Read(void)
 #endif
 
 /*
+*  Function    :    I2c_ResetAsSlave( )
+*  Purpose     :    I2C reset as slave
+*  Inputs      :    None
+*  Outputs     :    None
+*  Return Value:    None
+*  Limitation  :    None
+*/
+#if (DEF_ENABLED == USE_EEPROM)
+static void I2c_ResetAsSlave(void)
+{
+  int32_t ret = 0;
+  ARM_DRIVER_I2C * I2Cdrv = &DRIVER_I2C;
+
+  ret = I2Cdrv->Uninitialize();
+
+  if (ARM_DRIVER_OK == ret)
+  {
+#if ( DEF_ENABLED == TC956X_UART )
+    TC956X_Ser_Printf(" I2C UNINIT DONE *********************\r");
+#endif
+  }
+  else
+  {
+#if ( DEF_ENABLED == TC956X_UART )
+    TC956X_Ser_Printf(" I2C UNINIT FAILED *********************\r");
+#endif
+    return;
+  }
+
+  ret = I2Cdrv->ResetAsSlave();
+
+  if (ARM_DRIVER_OK == ret)
+  {
+#if ( DEF_ENABLED == TC956X_UART )
+    TC956X_Ser_Printf(" I2C RESET AS SLAVE DONE *********************\r");
+#endif
+  }
+  else
+  {
+#if ( DEF_ENABLED == TC956X_UART )
+    TC956X_Ser_Printf(" I2C RESET AS SLAVE FAILED *********************\r");
+#endif
+    return;
+  }
+
+  return;
+}
+/* End of I2c_ResetAsSlave */
+#endif
+
+/*
 *  Function    :    main( )
 *  Purpose     :    The standard entry point for C code. It is assumed
 *                   that your code will call main() once you have
@@ -566,7 +625,10 @@ int32_t main (void)
   /**  UART0 Init  **/
   Driver_USART0.Initialize(NULL);
 #endif
+
+#if (DEF_ENABLED == USE_EEPROM)
   I2c_Init();
+#endif
 #if (DEF_ENABLED == TEST_EEPROM_WRITE_ENABLE)
   Eeprom_Mac_Write();
 #endif
@@ -574,6 +636,8 @@ int32_t main (void)
 #if (DEF_ENABLED == USE_EEPROM)
   /* Disable EEPROM for bringup */
   Eeprom_Mac_Read();
+  /* Reset I2C as slave, allow external I2C master to read memory */
+  I2c_ResetAsSlave();
 #endif
   /* Enable WatchDog Timer Interrupt */
   NVIC_EnableIRQ( ( IRQn_Type )INT_SRC_NBR_WDT ) ;

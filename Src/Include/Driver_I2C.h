@@ -209,6 +209,7 @@ typedef struct _ARM_DRIVER_I2C {
   ARM_I2C_STATUS       (*GetStatus)      (void);                                                                ///< Pointer to \ref ARM_I2C_GetStatus : Get I2C status.
   int32_t              (*EepromWrite)    (uint32_t addr, uint8_t page_no, uint8_t *data, uint32_t num);   ///< Pointer to \ref tc956x_I2C_EepromWrite: Transmits data as Master to the EEPROM device.
   int32_t              (*EepromRead)     (uint32_t addr, uint8_t page_no, uint8_t *data, uint32_t num);   ///< Pointer to \ref tc956x_I2C_EepromRead: Reads data as Master from the EEPROM device.
+  int32_t              (*ResetAsSlave)   (void);                                                          ///< Pointer to \ref ARM_I2C_ResetAsSlave : Reset I2C Interface as slave.
 } const ARM_DRIVER_I2C;
 
 #ifdef  __cplusplus

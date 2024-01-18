@@ -63,13 +63,16 @@ INCLUDE FILES
 /*======================================================================
 GLOBAL VARIABLE
 ======================================================================*/
-volatile uint64_t guiM3Ticks = TC956X_VAL_ZERO ;    /* System ticks */
+volatile uint64_t guiM3Ticks = TC956X_VAL_ZERO;    /* System ticks */
 
 /*======================================================================
 MACRO DEFINITION
 ======================================================================*/
 #define INT_MCUMASK_MASK_ALL        0xFFFFFFFFU
 #define INT_MCUMASK2_MASK           0xFFFF7FFFU
+#ifndef ENABLE_MAC2MAC_BRIDGE
+#define INT_MCUMASK3_MASK           0xF8F8F3FFU
+#endif
 #define CPU_FREQ                    250000000U
 #define SYS_TICK_PRIO               0x00E00000U
 #define TC956X_GPIO3_OUTPUT         DEF_DISABLED
@@ -78,37 +81,40 @@ MACRO DEFINITION
 #define TEST_EEPROM_WRITE_ENABLE    DEF_DISABLED
 #define USE_EEPROM                  DEF_DISABLED
 
-static void Configure_Watchdog(void);
-static void Configure_Systick(void);
+#ifndef ENABLE_MAC2MAC_BRIDGE
+static void Configure_Watchdog (void);
+#endif
+
+static void Configure_Systick (void);
 #if (DEF_ENABLED == USE_EEPROM)
-static void I2c_Init(void) ;
+static void I2c_Init (void);
 static void I2c_ResetAsSlave(void);
 #endif
 #if (DEF_ENABLED == TEST_EEPROM_WRITE_ENABLE)
-static void Eeprom_Mac_Write(void);
+static void Eeprom_Mac_Write (void);
 #endif
 
 #if (DEF_ENABLED == USE_EEPROM)
-static void Eeprom_Mac_Read(void);
+static void Eeprom_Mac_Read (void);
 #endif
-static void SysInit(void);
+static void SysInit (void);
 
-#if ( DEF_ENABLED == TC956X_UART )
-static const FW_Version_t version = {'R', 1, 0, 7};
+#if (DEF_ENABLED == TC956X_UART)
+static const FW_Version_t version = {'R', 1, 1, 7};
 #endif
 
 #if (DEF_ENABLED == TEST_EEPROM_WRITE_ENABLE)
 static uint8_t eeprom_mac_addr[52] = {0x00,0xEC,0x21,0xE5,0x10,0x4F,0xEA,0xEC,0x21,0xE5,0x11,0x4F,0xEA,
-									  0x10,0xEC,0x21,0xE5,0x12,0x4F,0xEA,0xEC,0x21,0xE5,0x13,0x4F,0xEA,
-									  0x20,0xEC,0x21,0xE5,0x14,0x4F,0xEA,0xEC,0x21,0xE5,0x15,0x4F,0xEA,
-									  0x30,0xEC,0x21,0xE5,0x16,0x4F,0xEA,0xEC,0x21,0xE5,0x17,0x4F,0xEA};
+                                      0x10,0xEC,0x21,0xE5,0x12,0x4F,0xEA,0xEC,0x21,0xE5,0x13,0x4F,0xEA,
+                                      0x20,0xEC,0x21,0xE5,0x14,0x4F,0xEA,0xEC,0x21,0xE5,0x15,0x4F,0xEA,
+                                      0x30,0xEC,0x21,0xE5,0x16,0x4F,0xEA,0xEC,0x21,0xE5,0x17,0x4F,0xEA};
 #endif
 
 #if (DEF_ENABLED == USE_EEPROM)
 static uint8_t default_eeprom_mac_addr[48] = {0xEC,0x21,0xE5,0x10,0x4F,0xEA,0xEC,0x21,0xE5,0x11,0x4F,0xEA,
-											  0xEC,0x21,0xE5,0x12,0x4F,0xEA,0xEC,0x21,0xE5,0x13,0x4F,0xEA,
-											  0xEC,0x21,0xE5,0x14,0x4F,0xEA,0xEC,0x21,0xE5,0x15,0x4F,0xEA,
-											  0xEC,0x21,0xE5,0x16,0x4F,0xEA,0xEC,0x21,0xE5,0x17,0x4F,0xEA};
+                                              0xEC,0x21,0xE5,0x12,0x4F,0xEA,0xEC,0x21,0xE5,0x13,0x4F,0xEA,
+                                              0xEC,0x21,0xE5,0x14,0x4F,0xEA,0xEC,0x21,0xE5,0x15,0x4F,0xEA,
+                                              0xEC,0x21,0xE5,0x16,0x4F,0xEA,0xEC,0x21,0xE5,0x17,0x4F,0xEA};
 
 static uint8_t eeprom_read_mac_addr[65];
 #endif
@@ -116,7 +122,7 @@ static uint8_t eeprom_read_mac_addr[65];
 FUNCTION PROTOTYPES
 =======================================================================*/
 /*
-*  Function    :    Hw_Reg_Write32( uiAddr_Base, uiOffset, uiVal )
+*  Function    :    Hw_Reg_Write32(uiAddr_Base, uiOffset, uiVal)
 *  Purpose     :    write data to an address
 *  Inputs      :    uiAddr_Base - base address to write
 *  Inputs      :    uiOffset - offset from base address
@@ -128,18 +134,18 @@ FUNCTION PROTOTYPES
 void Hw_Reg_Write32 (const uint32_t uiAddr_base, const uint32_t uiOffset,
                       const uint32_t uiVal)
 {
-  volatile uint32_t *puiAddr = ( volatile uint32_t * )
-                               ( uint32_t * )( uiAddr_base + uiOffset ) ;
+  volatile uint32_t *puiAddr = (volatile uint32_t *)
+                               (uint32_t *)(uiAddr_base + uiOffset);
 
-  if ( NULL != puiAddr )
+  if (NULL != puiAddr)
   {
     *puiAddr = uiVal;
   }
 }
-/* End of Hw_Reg_Write32() */
+/* End of Hw_Reg_Write32( ) */
 
 /*
-*  Function    :    Hw_Reg_Read32( uiAddr_Base, uiOffset )
+*  Function    :    Hw_Reg_Read32(uiAddr_Base, uiOffset)
 *  Purpose     :    Read data from an address
 *  Inputs      :    uiAddr_Base - base address to read from
 *  Inputs      :    uiOffset - offset from base address
@@ -150,18 +156,18 @@ void Hw_Reg_Write32 (const uint32_t uiAddr_base, const uint32_t uiOffset,
 uint32_t Hw_Reg_Read32 (const uint32_t uiAddr_base,
                          const uint32_t uiOffset)
 {
-  uint32_t            uiVal  = 0 ;
+  uint32_t uiVal  = 0;
 
-  volatile const uint32_t *puiAddr = ( volatile uint32_t *)
-                               ( uint32_t *)( uiAddr_base + uiOffset ) ;
+  volatile const uint32_t *puiAddr = (volatile uint32_t *)
+                               (uint32_t *)(uiAddr_base + uiOffset);
 
-  if ( NULL != puiAddr )
+  if (NULL != puiAddr)
   {
-    uiVal = *puiAddr ;
+    uiVal = *puiAddr;
   }
-  return ( uiVal ) ;     /* Returns address */
+  return (uiVal);     /* Returns address */
 }
-/* End of Hw_Reg_Read32() */
+/* End of Hw_Reg_Read32( ) */
 
 /*
 *  Function    :    SysTick_Handler( )
@@ -178,9 +184,9 @@ void SysTick_Handler (void)
 
   guiM3Ticks++ ;
 
-  *(uint64_t*)( TC956X_M3_DBG_CNT_START + ( TC956X_FIFTEEN * TC956X_FOUR ) ) = guiM3Ticks ;
+  *(uint64_t*)(TC956X_M3_DBG_CNT_START + (TC956X_FIFTEEN * TC956X_FOUR)) = guiM3Ticks;
 
-#if ( DEF_ENABLED == TC956X_GPIO3_OUTPUT )
+#if (DEF_ENABLED == TC956X_GPIO3_OUTPUT)
   if (guiM3Ticks & 1)
   {
     tc956x_gpio.OutputData(GPIO_THREE, GPIO_HIGH);
@@ -193,15 +199,15 @@ void SysTick_Handler (void)
 #if ( DEF_ENABLED == TC956X_SW_MSI )
 
   /* Systick timer is 1ms. Check for every TC956X_SW_MSI_TRIGGER_TIME ms*/
-  if ((guiM3Ticks % TC956X_SW_MSI_TRIGGER_TIME) == 0)
+  if ((guiM3Ticks % TC956X_SW_MSI_TRIGGER_TIME) == 0U)
   {
     /* Handle Port0 */
     uiVal = *(uint32_t*)( TC956X_M3_DBG_CNT_START + ( TC956X_SEVENTEEN * TC956X_FOUR ) );
-    if (uiVal == 1)
+    if (uiVal == 1U)
     {
-      uiTxsts = Hw_Reg_Read32( XGMAC_MAC_OFFSET0, XGMAC_MTL_TxQ_DEBUG(0) );
+      uiTxsts = Hw_Reg_Read32( XGMAC_MAC_OFFSET0, XGMAC_MTL_TxQ_DEBUG(0U) );
       uiTxsts = (uiTxsts & XGMAC_MTL_TxQ_DEBUG_TXQSTS_MASK) >> XGMAC_MTL_TxQ_DEBUG_TXQSTS_SHIFT;
-      if(uiTxsts == 0)
+      if(uiTxsts == 0U)
       {
         Hw_Reg_Write32( TC956X_MSIGEN_REG_BASE, SW_MSI_SET_PF0, TC956X_ONE ) ;
       }
@@ -209,11 +215,11 @@ void SysTick_Handler (void)
 
   /* Handle Port1 */
     uiVal = *(uint32_t*)( TC956X_M3_DBG_CNT_START + ( TC956X_EIGHTEEN * TC956X_FOUR ) );
-    if (uiVal == 1)
+    if (uiVal == 1U)
     {
-      uiTxsts = Hw_Reg_Read32( XGMAC_MAC_OFFSET1, XGMAC_MTL_TxQ_DEBUG(0) );
+      uiTxsts = Hw_Reg_Read32( XGMAC_MAC_OFFSET1, XGMAC_MTL_TxQ_DEBUG(0U) );
       uiTxsts = (uiTxsts & XGMAC_MTL_TxQ_DEBUG_TXQSTS_MASK) >> XGMAC_MTL_TxQ_DEBUG_TXQSTS_SHIFT;
-      if (uiTxsts == 0)
+      if (uiTxsts == 0U)
       {
         Hw_Reg_Write32( TC956X_MSIGEN_REG_BASE, SW_MSI_SET_PF1, TC956X_ONE ) ;
       }
@@ -235,21 +241,22 @@ void SysTick_Handler (void)
 */
 static void Configure_Systick (void)
 {
-  uint32_t uiCount ;
+  uint32_t uiCount;
 
   /* CPU_FREQ ticks : cpu_freq/1000 for 1ms */
-  uiCount = ( CPU_FREQ / TC956X_THOUSAND ) ;
-  CPU_REG_NVIC_ST_RELOAD = ( uiCount - TC956X_ONE ) ;
+  uiCount = (CPU_FREQ / TC956X_THOUSAND);
+  CPU_REG_NVIC_ST_RELOAD = (uiCount - TC956X_ONE);
 
   /* Set SysTick handler */
-  CPU_REG_NVIC_SHPRI3 = SYS_TICK_PRIO ;
+  CPU_REG_NVIC_SHPRI3 = SYS_TICK_PRIO;
   /* Enable timer.*/
-  CPU_REG_NVIC_ST_CTRL |= ( TC956X_COMMON_FOUR | TC956X_COMMON_ONE ) ;
+  CPU_REG_NVIC_ST_CTRL |= (TC956X_COMMON_FOUR | TC956X_COMMON_ONE);
   /* Enable timer interrupt.*/
-  CPU_REG_NVIC_ST_CTRL |= TC956X_COMMON_TWO ;
+  CPU_REG_NVIC_ST_CTRL |= TC956X_COMMON_TWO;
 }
 /* End of Configure_Systick */
 
+#ifndef ENABLE_MAC2MAC_BRIDGE
 /*
 *  Function    :    Configure_Watchdog( )
 *  Purpose     :    Configure watchdog timer
@@ -260,19 +267,20 @@ static void Configure_Systick (void)
 */
 static void Configure_Watchdog (void)
 {
-  uint32_t uiData ;
+  uint32_t uiData;
 
   /* Enable WatchDog Timer */
-  uiData = Hw_Reg_Read32( TC956X_INTC_REG_BASE, INTINTWDEXP_OFFS ) ;
-  Hw_Reg_Write32( TC956X_INTC_REG_BASE, INTINTWDEXP_OFFS,
-                  ( uiData | ( WDEXP_WDEXP_MAX_MASK ) ) ) ;
+  uiData = Hw_Reg_Read32(TC956X_INTC_REG_BASE, INTINTWDEXP_OFFS);
+  Hw_Reg_Write32(TC956X_INTC_REG_BASE, INTINTWDEXP_OFFS,
+                  (uiData | (WDEXP_WDEXP_MAX_MASK)));
 
-  uiData = Hw_Reg_Read32( TC956X_INTC_REG_BASE, INTINTWDCTL_OFFS ) ;
-  Hw_Reg_Write32( TC956X_INTC_REG_BASE, INTINTWDCTL_OFFS, ( uiData |
-                  ( WDCTL_WDEnable_MASK ) | ( WDCTL_WDRestart_MASK ) ) ) ;
+  uiData = Hw_Reg_Read32(TC956X_INTC_REG_BASE, INTINTWDCTL_OFFS);
+  Hw_Reg_Write32(TC956X_INTC_REG_BASE, INTINTWDCTL_OFFS, (uiData |
+                  (WDCTL_WDEnable_MASK) | (WDCTL_WDRestart_MASK)));
 
 }
 /* End of Configure_Watchdog */
+#endif
 
 /*
 *  Function    :    SysInit( )
@@ -285,40 +293,45 @@ static void Configure_Watchdog (void)
 static void SysInit (void)
 {
 
-  /* Enable clocks (eMAC0All, MSIGEN, MACRX/TX, INTC and default clocks  ) */
-  Hw_Reg_Write32 ( TC956X_REG_BASE, TC956X_NCLKCTRL0_OFFS, TC956X_CLK_CTRL0_ENABLE ) ;
-  Hw_Reg_Write32 ( TC956X_REG_BASE, TC956X_NCLKCTRL1_OFFS, TC956X_CLK_CTRL1_ENABLE ) ;
+  /* Enable clocks (eMAC0All, MSIGEN, MACRX/TX, INTC and default clocks ) */
+  Hw_Reg_Write32 (TC956X_REG_BASE, TC956X_NCLKCTRL0_OFFS, TC956X_CLK_CTRL0_ENABLE);
+  Hw_Reg_Write32 (TC956X_REG_BASE, TC956X_NCLKCTRL1_OFFS, TC956X_CLK_CTRL1_ENABLE);
 
   /* Reset is de-asserted (MCU, INTC, eMAC ...) */
-  Hw_Reg_Write32 ( TC956X_REG_BASE, TC956X_NRSTCTRL0_OFFS, TC956X_VAL_ZERO ) ;
-  Hw_Reg_Write32 ( TC956X_REG_BASE, TC956X_NRSTCTRL1_OFFS, TC956X_VAL_ZERO ) ;
+  Hw_Reg_Write32 (TC956X_REG_BASE, TC956X_NRSTCTRL0_OFFS, TC956X_VAL_ZERO);
+  Hw_Reg_Write32 (TC956X_REG_BASE, TC956X_NRSTCTRL1_OFFS, TC956X_VAL_ZERO);
 
 
-#if ( DEF_ENABLED == TC956X_GPIO3_OUTPUT )
+#if (DEF_ENABLED == TC956X_GPIO3_OUTPUT)
   tc956x_gpio.ConfigOutput(GPIO_THREE); /* config GPIO0 for output */
 #endif
 
   /* Mask all interrupts for MCU , Not using any interrupts for CPU */
-  Hw_Reg_Write32( TC956X_INTC_REG_BASE, INTMCUMASK0_OFFS, INT_MCUMASK_MASK_ALL );
-  Hw_Reg_Write32( TC956X_INTC_REG_BASE, INTMCUMASK1_OFFS, INT_MCUMASK_MASK_ALL );
+  Hw_Reg_Write32(TC956X_INTC_REG_BASE, INTMCUMASK0_OFFS, INT_MCUMASK_MASK_ALL);
+  Hw_Reg_Write32(TC956X_INTC_REG_BASE, INTMCUMASK1_OFFS, INT_MCUMASK_MASK_ALL);
   /* Enable WDT interrupt, PCIe EP Local Interrupt and mask all other interrupts */
-  Hw_Reg_Write32( TC956X_INTC_REG_BASE, INTMCUMASK2_OFFS, INT_MCUMASK2_MASK );
-  Hw_Reg_Write32( TC956X_INTC_REG_BASE, INTMCUMASK3_OFFS, INT_MCUMASK_MASK_ALL );
-
+  Hw_Reg_Write32(TC956X_INTC_REG_BASE, INTMCUMASK2_OFFS, INT_MCUMASK2_MASK);
+#ifdef ENABLE_MAC2MAC_BRIDGE
+  Hw_Reg_Write32(TC956X_INTC_REG_BASE, INTMCUMASK3_OFFS, INT_MCUMASK_MASK_ALL);
+#else
+  Hw_Reg_Write32(TC956X_INTC_REG_BASE, INTMCUMASK3_OFFS, INT_MCUMASK3_MASK);
+#endif
   /* Mask all Externel interrupts */
-  Hw_Reg_Write32( TC956X_INTC_REG_BASE, INTEXTMASK0_OFFS, INT_MCUMASK_MASK_ALL );
-  Hw_Reg_Write32( TC956X_INTC_REG_BASE, INTEXTMASK1_OFFS, INT_MCUMASK_MASK_ALL );
-  Hw_Reg_Write32( TC956X_INTC_REG_BASE, INTEXTMASK2_OFFS, INT_MCUMASK_MASK_ALL );
-  Hw_Reg_Write32( TC956X_INTC_REG_BASE, INTEXTMASK3_OFFS, INT_MCUMASK_MASK_ALL );
+  Hw_Reg_Write32(TC956X_INTC_REG_BASE, INTEXTMASK0_OFFS, INT_MCUMASK_MASK_ALL);
+  Hw_Reg_Write32(TC956X_INTC_REG_BASE, INTEXTMASK1_OFFS, INT_MCUMASK_MASK_ALL);
+  Hw_Reg_Write32(TC956X_INTC_REG_BASE, INTEXTMASK2_OFFS, INT_MCUMASK_MASK_ALL);
+  Hw_Reg_Write32(TC956X_INTC_REG_BASE, INTEXTMASK3_OFFS, INT_MCUMASK_MASK_ALL);
 
   /* Mask all INTX interrupts */
-  Hw_Reg_Write32( TC956X_INTC_REG_BASE, INTINTXMASK0_OFFS, INT_MCUMASK_MASK_ALL );
-  Hw_Reg_Write32( TC956X_INTC_REG_BASE, INTINTXMASK1_OFFS, INT_MCUMASK_MASK_ALL );
-  Hw_Reg_Write32( TC956X_INTC_REG_BASE, INTINTXMASK2_OFFS, INT_MCUMASK_MASK_ALL );
+  Hw_Reg_Write32(TC956X_INTC_REG_BASE, INTINTXMASK0_OFFS, INT_MCUMASK_MASK_ALL);
+  Hw_Reg_Write32(TC956X_INTC_REG_BASE, INTINTXMASK1_OFFS, INT_MCUMASK_MASK_ALL);
+  Hw_Reg_Write32(TC956X_INTC_REG_BASE, INTINTXMASK2_OFFS, INT_MCUMASK_MASK_ALL);
 
-  Configure_Systick();
-  Configure_Watchdog();
-  CPU_IntEn() ;
+  Configure_Systick( );
+#ifndef ENABLE_MAC2MAC_BRIDGE
+  Configure_Watchdog( );
+#endif
+  CPU_IntEn( );
 }
 /* End of SysInit */
 
@@ -339,13 +352,13 @@ static void I2c_Init(void)
 
   if (ARM_DRIVER_OK == ret)
   {
-#if ( DEF_ENABLED == TC956X_UART )
+#if (DEF_ENABLED == TC956X_UART)
     TC956X_Ser_Printf(" I2C INIT DONE *********************\r");
 #endif
   }
   else
   {
-#if ( DEF_ENABLED == TC956X_UART )
+#if (DEF_ENABLED == TC956X_UART)
     TC956X_Ser_Printf(" I2C INIT FAILED *********************\r");
 #endif
     return;
@@ -354,13 +367,13 @@ static void I2c_Init(void)
 
   if (ARM_DRIVER_OK == ret)
   {
-#if ( DEF_ENABLED == TC956X_UART )
+#if (DEF_ENABLED == TC956X_UART)
     TC956X_Ser_Printf(" I2C config DONE *********************\r");
 #endif
   }
   else
   {
-#if ( DEF_ENABLED == TC956X_UART )
+#if (DEF_ENABLED == TC956X_UART)
     TC956X_Ser_Printf(" I2C config FAILED *********************\r");
 #endif
   }
@@ -378,7 +391,7 @@ static void I2c_Init(void)
 *  Return Value:    None
 *  Limitation  :    None
 */
-static void Eeprom_Mac_Write(void)
+static void Eeprom_Mac_Write (void)
 {
   int32_t ret = 0;
   uint8_t i, eeprom_mac_count, counter;
@@ -386,27 +399,31 @@ static void Eeprom_Mac_Write(void)
   uint8_t offset = *(uint8_t *) TC956X_M3_EEPROM_OFFSET_ADDR;
   uint8_t mac_addr_count = *(uint8_t *) TC956X_M3_MAC_COUNT;
 
-  if(mac_addr_count == TC956X_ONE) {
-	eeprom_mac_count = TC956X_SIX;
-	counter = mac_addr_count;
-  } else {
-	eeprom_mac_count = TC956X_THIRTEEN;
-	counter = (mac_addr_count % TC956X_TWO) ? ((mac_addr_count/TC956X_TWO)+TC956X_ONE):(mac_addr_count/TC956X_TWO);
+  if(mac_addr_count == TC956X_ONE)
+  {
+    eeprom_mac_count = TC956X_SIX;
+    counter = mac_addr_count;
+  }
+  else
+  {
+    eeprom_mac_count = TC956X_THIRTEEN;
+    counter = (mac_addr_count % TC956X_TWO) ? ((mac_addr_count/TC956X_TWO)+TC956X_ONE):(mac_addr_count/TC956X_TWO);
   }
 
-  for(i = 0; i < counter; i++) {
+  for(i = 0; i < counter; i++)
+  {
     eeprom_mac_addr[i * TC956X_THIRTEEN] = offset + i * TC956X_SIXTEEN;
     ret = I2Cdrv->EepromWrite(EEPROM_SLAVE_ADDRESS, TC956X_ZERO, &eeprom_mac_addr[i * TC956X_THIRTEEN],
-	                          eeprom_mac_count);
+                              eeprom_mac_count);
     if (ret != ARM_DRIVER_OK)
     {
-#if ( DEF_ENABLED == TC956X_UART )
+#if (DEF_ENABLED == TC956X_UART)
       TC956X_Ser_Printf("MAC address write on EEPROM failed\n");
 #endif
     }
     else
     {
-#if ( DEF_ENABLED == TC956X_UART )
+#if (DEF_ENABLED == TC956X_UART)
       TC956X_Ser_Printf("*** MAC address write on EEPROM successful ***\n");
 #endif
     }
@@ -426,7 +443,7 @@ static void Eeprom_Mac_Write(void)
 *  Limitation  :    None
 */
 #if (DEF_ENABLED == USE_EEPROM)
-static void Eeprom_Mac_Read(void)
+static void Eeprom_Mac_Read (void)
 {
   int32_t ret = 0;
   uint8_t i, eeprom_mac_count, count = 0, k = 0;
@@ -439,71 +456,79 @@ static void Eeprom_Mac_Read(void)
 
   ARM_DRIVER_I2C * I2Cdrv = &DRIVER_I2C;
   eeprom_read_mac_addr[0] = offset_addr;
-  if(mac_addr_count > TC956X_TWO) {
-	  eeprom_mac_count = TC956X_EIGHT * mac_addr_count;
-  } else if(mac_addr_count == TC956X_ONE) {
-	  eeprom_mac_count = TC956X_SIX;
-  } else {
-	  eeprom_mac_count = TC956X_TWELVE;
+  if(mac_addr_count > TC956X_TWO)
+  {
+    eeprom_mac_count = TC956X_EIGHT * mac_addr_count;
+  }
+  else if(mac_addr_count == TC956X_ONE)
+  {
+    eeprom_mac_count = TC956X_SIX;
+  }
+  else
+  {
+    eeprom_mac_count = TC956X_TWELVE;
   }
   ret = I2Cdrv->EepromRead(EEPROM_SLAVE_ADDRESS, TC956X_ZERO, eeprom_read_mac_addr,(eeprom_mac_count + TC956X_COMMON_ONE));
   if (ret != ARM_DRIVER_OK)
   {
     /* writing MAC address for MAC0*/
-    for (i = TC956X_ZERO ; i < eeprom_mac_count; i++) {
+    for (i = TC956X_ZERO; i < eeprom_mac_count; i++)
+    {
       /* if EEPROM read fails write 0*/
-      *( uint8_t* )( TC956X_M3_MAC_ADDR_START + k ) = default_eeprom_mac_addr[i];
-	    if(k % TC956X_EIGHT == TC956X_FIVE)
+      *(uint8_t*)(TC956X_M3_MAC_ADDR_START + k) = default_eeprom_mac_addr[i];
+      if(k % TC956X_EIGHT == TC956X_FIVE)
         k += TC956X_THREE;
       else
         k++;
     }
-#if ( DEF_ENABLED == TC956X_UART )
+#if (DEF_ENABLED == TC956X_UART)
     TC956X_Ser_Printf("MAC address read from EEPROM failed\n");
 #endif
   }
   else
   {
     /* writing MAC address for MAC0*/
-    for (i = TC956X_ZERO ; i < eeprom_mac_count; i++) {
-	    count++;
+    for (i = TC956X_ZERO; i < eeprom_mac_count; i++)
+    {
+      count++;
+      if(count == TC956X_SIXTEEN)
+      {
+        count = TC956X_ZERO;
+        continue;
+      }
 
-	    if(count == TC956X_SIXTEEN) {
-		    count = TC956X_ZERO;
-		    continue;
-	    }
+      if(count > TC956X_TWELVE)
+        continue;
 
-	    if(count > TC956X_TWELVE)
-		    continue;
-
-      *( uint8_t* )( TC956X_M3_MAC_ADDR_START + k ) = eeprom_read_mac_addr[i + 1];
-	    if(k % TC956X_EIGHT == TC956X_FIVE)
+      *(uint8_t*)(TC956X_M3_MAC_ADDR_START + k) = eeprom_read_mac_addr[i + 1];
+      if(k % TC956X_EIGHT == TC956X_FIVE)
         k += TC956X_THREE;
       else
         k++;
     }
-#if ( DEF_ENABLED == TC956X_UART )
+#if (DEF_ENABLED == TC956X_UART)
       TC956X_Ser_Printf("*** MAC address read from EEPROM successful ***\n");
 #endif
   }
 #if (DEF_ENABLED == TEST_EEPROM_WRITE_ENABLE)
   count = 0;
-  for (i = TC956X_ZERO ; i < eeprom_mac_count; i++) {
-   	count++;
+  for (i = TC956X_ZERO; i < eeprom_mac_count; i++)
+  {
+    count++;
 
-	   if(count == TC956X_SIXTEEN) {
-	    count = TC956X_ZERO;
-	    continue;
-	   }
+    if(count == TC956X_SIXTEEN)
+    {
+      count = TC956X_ZERO;
+      continue;
+    }
 
-	   if(count > TC956X_TWELVE)
-	    continue;
+    if(count > TC956X_TWELVE)
+      continue;
 
     n++;
 
-	  if((n != TC956X_ZERO) && !(n % TC956X_THIRTEEN)) {
-  		n++;
-  	}
+    if((n != TC956X_ZERO) && !(n % TC956X_THIRTEEN))
+      n++;
 
     if (eeprom_mac_addr[n] == eeprom_read_mac_addr[i+1])
     {
@@ -511,7 +536,7 @@ static void Eeprom_Mac_Read(void)
     }
     else
     {
-#if ( DEF_ENABLED == TC956X_UART )
+#if (DEF_ENABLED == TC956X_UART)
       TC956X_Ser_Printf("*** MAC address read from EEPROM incorrect %dth bit is 0x%X instead of 0x%X***\n", i + 1,
       eeprom_read_mac_addr[i+1], eeprom_mac_addr[n]);
 #endif
@@ -577,7 +602,7 @@ static void I2c_ResetAsSlave(void)
 /*
 *  Function    :    main( )
 *  Purpose     :    The standard entry point for C code. It is assumed
-*                   that your code will call main() once you have
+*                   that your code will call main( ) once you have
 *                   performed all necessary initialization.
 *  Inputs      :    None
 *  Outputs     :    None
@@ -587,89 +612,92 @@ static void I2c_ResetAsSlave(void)
 int32_t main (void)
 {
   /* Iteration count */
-  uint32_t uiCount ;
-#if ( DEF_ENABLED == TC956X_UART )
-  int08_t ver_str[32] ;
+  uint32_t uiCount;
+#if (DEF_ENABLED == TC956X_UART)
+  int08_t ver_str[32];
 #endif
 
   *(uint8_t *) TC956X_M3_FW_INIT_DONE = TC956X_ZERO;
 
-  for ( uiCount = TC956X_ZERO; uiCount < ( TC956X_M3_DBG_CNT_SIZE / TC956X_FOUR ); uiCount++ )
+  for (uiCount = TC956X_ZERO; uiCount < (TC956X_M3_DBG_CNT_SIZE / TC956X_FOUR); uiCount++)
   {
     /* clear the count */
-    *( uint32_t*)( TC956X_M3_DBG_CNT_START + ( uiCount * TC956X_FOUR ) ) = TC956X_ZERO ;
+    *(uint32_t*)(TC956X_M3_DBG_CNT_START + (uiCount * TC956X_FOUR)) = TC956X_ZERO;
   }
 
-  for ( uiCount = TC956X_ZERO; uiCount < ( SRAM_EVENT_LOC_SIZE / TC956X_FOUR ); uiCount++ )
+  for (uiCount = TC956X_ZERO; uiCount < (SRAM_EVENT_LOC_SIZE / TC956X_FOUR); uiCount++)
   {
     /* clear the count */
-    *( uint32_t*)( SRAM_TX_PCIE_ADDR_LOC + (uiCount * TC956X_FOUR ) ) = TC956X_ZERO;
-    *( uint32_t*)( SRAM_RX_PCIE_ADDR_LOC + (uiCount * TC956X_FOUR ) ) = TC956X_ZERO;
+    *(uint32_t*)(SRAM_TX_PCIE_ADDR_LOC + (uiCount * TC956X_FOUR)) = TC956X_ZERO;
+    *(uint32_t*)(SRAM_RX_PCIE_ADDR_LOC + (uiCount * TC956X_FOUR)) = TC956X_ZERO;
   }
 
-#if ( DEF_ENABLED == TC956X_UART )
-  *( uint32_t*)(TC956X_M3_DBG_VER_START) = *( uint32_t *)(&version);
+#if (DEF_ENABLED == TC956X_UART)
+  *(uint32_t*)(TC956X_M3_DBG_VER_START) = *(uint32_t *)(&version);
   snprintf(ver_str, 32, "Version %s_%d.%d-%d", (version.rel_dbg == 'R')?"REL":"DBG",
   version.major, version.minor, version.sub_minor);
 #endif
 
-#if ( DEF_ENABLED == TC956X_GPIO3_OUTPUT )
+#if (DEF_ENABLED == TC956X_GPIO3_OUTPUT)
   /* Initialize GPIO */
-  tc956x_gpio.Initialize();
+  tc956x_gpio.Initialize( );
 #endif
 
   /* System Init function */
-  SysInit( ) ;
+  SysInit( );
 
-#if ( DEF_ENABLED == TC956X_UART )
+#if (DEF_ENABLED == TC956X_UART)
   /**  UART0 Init  **/
   Driver_USART0.Initialize(NULL);
 #endif
-
 #if (DEF_ENABLED == USE_EEPROM)
-  I2c_Init();
+  I2c_Init( );
 #endif
 #if (DEF_ENABLED == TEST_EEPROM_WRITE_ENABLE)
-  Eeprom_Mac_Write();
+  Eeprom_Mac_Write( );
 #endif
 
 #if (DEF_ENABLED == USE_EEPROM)
   /* Disable EEPROM for bringup */
-  Eeprom_Mac_Read();
+  Eeprom_Mac_Read( );
   /* Reset I2C as slave, allow external I2C master to read memory */
   I2c_ResetAsSlave();
 #endif
   /* Enable WatchDog Timer Interrupt */
-  NVIC_EnableIRQ( ( IRQn_Type )INT_SRC_NBR_WDT ) ;
+  NVIC_EnableIRQ((IRQn_Type)INT_SRC_NBR_WDT);
 
-#ifdef DMA_OFFLOAD_ENABLE
+#if defined(TC956X_DMA_OFFLOAD_ENABLE) || defined(ENABLE_MAC2MAC_BRIDGE)
   /* Enable Tx and Rx Interrupts for MAC0 and MAC1 */
-  NVIC_EnableIRQ( ( IRQn_Type )INT_SRC_NBR_MAC0_TXDMA ) ;
-  NVIC_EnableIRQ( ( IRQn_Type )INT_SRC_NBR_MAC0_RXDMA ) ;
-  NVIC_EnableIRQ( ( IRQn_Type )INT_SRC_NBR_MAC1_TXDMA ) ;
-  NVIC_EnableIRQ( ( IRQn_Type )INT_SRC_NBR_MAC1_RXDMA ) ;
+  NVIC_EnableIRQ((IRQn_Type)INT_SRC_NBR_MAC0_TXDMA);
+  NVIC_EnableIRQ((IRQn_Type)INT_SRC_NBR_MAC0_RXDMA);
+  NVIC_EnableIRQ((IRQn_Type)INT_SRC_NBR_MAC1_TXDMA);
+  NVIC_EnableIRQ((IRQn_Type)INT_SRC_NBR_MAC1_RXDMA);
+#if defined(ENABLE_MAC2MAC_BRIDGE)
+  NVIC_EnableIRQ((IRQn_Type)INT_SRC_NBR_MCU_FLAG);
 #endif
+#endif
+  NVIC_EnableIRQ( ( IRQn_Type )INT_SRC_NBR_PCIEFLR ) ;
 
-#if ( DEF_ENABLED == TC956X_UART )
-  TC956X_Ser_Printf( "\r\nTC956X PCIe Firmware %s is Loaded Successfully and running on Cortex M3\r\n", ver_str ) ;
+#if (DEF_ENABLED == TC956X_UART)
+  TC956X_Ser_Printf("\r\nTC956X PCIe Firmware %s is Loaded Successfully and running on Cortex M3\r\n", ver_str);
 #endif
 
   *(uint8_t *) TC956X_M3_FW_INIT_DONE = TC956X_ONE;
 
-  while ( true )
+  while (true)
   {
-    if ( (*(uint32_t *)TC956X_M3_FW_EXIT) == TC956X_TWO )
+    if ((*(uint32_t *)TC956X_M3_FW_EXIT) == TC956X_TWO)
       break;
 
-    __wfi();
+    __wfi( );
   }
 
   /* Disable systick timer */
   CPU_REG_NVIC_ST_CTRL &= ~TC956X_COMMON_ONE;
 
-  /* Disable clocks (eMAC0All, MSIGEN, MACRX/TX, INTC ) except default clocks */
-  Hw_Reg_Write32 ( TC956X_REG_BASE, TC956X_NCLKCTRL0_OFFS, TC956X_CLK_CTRL0_DISABLE ) ;
-  Hw_Reg_Write32 ( TC956X_REG_BASE, TC956X_NCLKCTRL1_OFFS, TC956X_CLK_CTRL1_DISABLE ) ;
+  /* Disable clocks (eMAC0All, MSIGEN, MACRX/TX, INTC) except default clocks */
+  Hw_Reg_Write32 (TC956X_REG_BASE, TC956X_NCLKCTRL0_OFFS, TC956X_CLK_CTRL0_DISABLE);
+  Hw_Reg_Write32 (TC956X_REG_BASE, TC956X_NCLKCTRL1_OFFS, TC956X_CLK_CTRL1_DISABLE);
 
 
 }

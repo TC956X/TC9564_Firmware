@@ -1,7 +1,7 @@
 # Toshiba Electronic Devices & Storage Corporation TC956X PCIe Ethernet Bridge Firmware
 
-Release Date: Jun 10 2022
-Relase Version: V1.0.7 : Limited-tested version
+Release Date: Aug 10 2023
+Relase Version: V_1.1.7
 
 
 # Introduction:
@@ -82,3 +82,5 @@ The folder contains a Keil project, which is the firmware for PCIe interface.
 1. FW will set I2C in slave mode by default. If using EEPROM, then I2C master configuration will used and switched back to I2C slave after completion of EEPROM operation.
 2. Corrected bit settings in ARM_I2C_Uninitialize API.
 
+## TC956X_Linux_Firmware_PCIeBridge_20230810_V1.1.7:
+1. IPA enabled by default

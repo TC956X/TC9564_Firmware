@@ -88,7 +88,7 @@ typedef struct {
   uint32_t  speed;          /* IC_CON.SPEED register fieldvalue */
 } I2C_INFO;
 
-static I2C_INFO  *info;      /* Run-Time information */
+static I2C_INFO info;      /* Run-Time information */
 
 /*********************************************************************************************************
 *                                             Function Declaration
@@ -226,17 +226,17 @@ static int32_t ARM_I2C_Initialize (ARM_I2C_SignalEvent_t cb_event)
   uint8_t  cnt;
   uint32_t mode_pin;
 
-  if ((I2C_INITIALIZED == info->flags) || (cb_event != NULL))
+  if ((I2C_INITIALIZED == info.flags) || (cb_event != NULL))
   {
     return ARM_DRIVER_ERROR;
   }
 
   /* Check whether I2C mode is selected on board*/
-  mode_pin = hw_reg_read32 ( TC956X_REG_BASE, CNF_REG_NMODESTS ) ;
-  mode_pin = ( mode_pin >> MODE_I2C_BIT_POS ) & TC956X_I2C_ONE;
+  mode_pin = hw_reg_read32 (TC956X_REG_BASE, CNF_REG_NMODESTS);
+  mode_pin = (mode_pin >> MODE_I2C_BIT_POS) & TC956X_I2C_ONE;
   if (mode_pin != TC956X_ZERO)
   {
-    return ARM_DRIVER_ERROR_UNSUPPORTED ;
+    return ARM_DRIVER_ERROR_UNSUPPORTED;
   }
 
   /* select I2C_SCL/SDA */
@@ -278,8 +278,8 @@ static int32_t ARM_I2C_Initialize (ARM_I2C_SignalEvent_t cb_event)
   reg_value &= ~((uint32_t)TC956X_I2C_ONE << I2C_CLK_RST_BIT); /* disable NCLKRST for I2C */
   hw_reg_write32(CNF_REG_BASE, CNF_REG_NRSTCTRL, reg_value);
 
-  info->speed = I2C_CON_SPEED_FAST;  /* set to reset value */
-  info->flags = I2C_INITIALIZED;
+  info.speed = I2C_CON_SPEED_FAST;  /* set to reset value */
+  info.flags = I2C_INITIALIZED;
   return ARM_DRIVER_OK;
 }
 
@@ -292,7 +292,7 @@ static int32_t ARM_I2C_Uninitialize (void)
 {
   uint32_t reg_value;
 
-  if (I2C_INITIALIZED != info->flags)
+  if (I2C_INITIALIZED != info.flags)
   {
     return ARM_DRIVER_ERROR;
   }
@@ -310,7 +310,7 @@ static int32_t ARM_I2C_Uninitialize (void)
   hw_reg_read32(CNF_REG_BASE, CNF_REG_NCLKCTRL);
   hw_reg_read32(CNF_REG_BASE, CNF_REG_NCLKCTRL);
 
-  info->flags = I2C_UNINITIALIZED;
+  info.flags = I2C_UNINITIALIZED;
 
   return ARM_DRIVER_OK;
 }
@@ -326,12 +326,12 @@ static int32_t ARM_I2C_Uninitialize (void)
 */
 static int32_t ARM_I2C_MasterTransmit (uint32_t addr, const uint8_t *data, uint32_t num, bool xfer_pending)
 {
-  uint32_t i2c_data_cmd, reg_value ;
+  uint32_t i2c_data_cmd, reg_value;
   uint32_t i2c_10bit, stop_bit;
   uint32_t pending_bytes = num;
   uint32_t retryCount = TC956X_ZERO;
 
-  if (I2C_INITIALIZED != info->flags)
+  if (I2C_INITIALIZED != info.flags)
   {
     return ARM_DRIVER_ERROR;
   }
@@ -376,7 +376,7 @@ static int32_t ARM_I2C_MasterTransmit (uint32_t addr, const uint8_t *data, uint3
   hw_reg_write32(I2C_REG_BASE, IC_TAR, reg_value);
 
   /*set the bit addressing, speed and master mode in control register*/
-  reg_value = info->speed | I2C_CON_MASTER_ENABLE
+  reg_value = info.speed | I2C_CON_MASTER_ENABLE
                           | I2C_CON_SLAVE_DISABLE
                           | I2C_CON_RESTART_ENABLE;
   hw_reg_write32(I2C_REG_BASE, IC_CON, reg_value);
@@ -443,7 +443,7 @@ static int32_t ARM_I2C_MasterReceive (uint32_t addr, uint8_t *data, uint32_t num
   command_bytes = num;
   pending_bytes = num;
 
-  if (I2C_INITIALIZED != info->flags)
+  if (I2C_INITIALIZED != info.flags)
   {
     return ARM_DRIVER_ERROR;
   }
@@ -488,7 +488,7 @@ static int32_t ARM_I2C_MasterReceive (uint32_t addr, uint8_t *data, uint32_t num
   hw_reg_write32(I2C_REG_BASE, IC_TAR, reg_value);
 
   /*set the bit addressing, speed and master mode in control register*/
-  reg_value = info->speed | I2C_CON_MASTER_ENABLE
+  reg_value = info.speed | I2C_CON_MASTER_ENABLE
                           | I2C_CON_SLAVE_DISABLE
                           | I2C_CON_RESTART_ENABLE;
   hw_reg_write32(I2C_REG_BASE, IC_CON, reg_value);
@@ -560,7 +560,7 @@ static int32_t ARM_I2C_MasterReceive (uint32_t addr, uint8_t *data, uint32_t num
 static int32_t ARM_I2C_Control (uint32_t control, uint32_t arg)
 {
   int32_t ret;
-  if (I2C_INITIALIZED != info->flags)
+  if (I2C_INITIALIZED != info.flags)
   {
     return ARM_DRIVER_ERROR;
   }
@@ -568,19 +568,19 @@ static int32_t ARM_I2C_Control (uint32_t control, uint32_t arg)
   switch (control) {
     case ARM_I2C_OWN_ADDRESS:
     ret = ARM_DRIVER_ERROR_UNSUPPORTED;
-	break;
+    break;
   case ARM_I2C_BUS_SPEED:
     ret = SetupBusSpeed(arg);
-	break;
+    break;
   case ARM_I2C_BUS_CLEAR:
     ret = ARM_DRIVER_ERROR_UNSUPPORTED;
-	break;
+    break;
   case ARM_I2C_ABORT_TRANSFER:
     ret = ARM_DRIVER_ERROR_UNSUPPORTED;
-	break;
+    break;
   default:
     ret = ARM_DRIVER_ERROR_PARAMETER;
-	break;
+    break;
   }
   return ret;
 }
@@ -612,7 +612,7 @@ static ARM_I2C_CAPABILITIES ARM_I2C_GetCapabilities (void)
     1 ,    /* supports 10-bit addressing */
     0
   };
-  return DriverCapabilities ;
+  return DriverCapabilities;
 }
 
 static int32_t ARM_I2C_SlaveTransmit (const uint8_t *data, uint32_t num)
@@ -633,19 +633,19 @@ static int32_t SetupBusSpeed(uint32_t speed)
 
   switch (speed) {
     case ARM_I2C_BUS_SPEED_STANDARD:
-      info->speed = I2C_CON_SPEED_STANDARD;
+      info.speed = I2C_CON_SPEED_STANDARD;
       hw_reg_write32(I2C_REG_BASE, IC_SS_SCL_HCNT, I2C_SS_SCL_HCNT);
       hw_reg_write32(I2C_REG_BASE, IC_SS_SCL_LCNT, I2C_SS_SCL_LCNT);
       hw_reg_write32(I2C_REG_BASE, IC_SDA_SETUP, I2C_SS_SDA_SETUP);
       break;
     case ARM_I2C_BUS_SPEED_FAST:
-      info->speed = I2C_CON_SPEED_FAST;
+      info.speed = I2C_CON_SPEED_FAST;
       hw_reg_write32(I2C_REG_BASE, IC_FS_SCL_HCNT, I2C_FS_SCL_HCNT);
       hw_reg_write32(I2C_REG_BASE, IC_FS_SCL_LCNT, I2C_FS_SCL_LCNT);
       hw_reg_write32(I2C_REG_BASE, IC_SDA_SETUP, I2C_FS_SDA_SETUP);
       break;
     case ARM_I2C_BUS_SPEED_FAST_PLUS:
-      info->speed = I2C_CON_SPEED_FAST;
+      info.speed = I2C_CON_SPEED_FAST;
       hw_reg_write32(I2C_REG_BASE, IC_FS_SCL_HCNT, I2C_FS_PLUS_SCL_HCNT);
       hw_reg_write32(I2C_REG_BASE, IC_FS_SCL_LCNT, I2C_FS_PLUS_SCL_LCNT);
       hw_reg_write32(I2C_REG_BASE, IC_SDA_SETUP, I2C_FS_PLUS_SDA_SETUP);
@@ -665,13 +665,13 @@ static int32_t SetupBusSpeed(uint32_t speed)
 static int32_t ARM_I2C_PowerControl (ARM_POWER_STATE state)
 {
   /* Undefined function*/
-  return ARM_DRIVER_ERROR_UNSUPPORTED ;
+  return ARM_DRIVER_ERROR_UNSUPPORTED;
 }
 
 static int32_t ARM_I2C_GetDataCount (void)
 {
   /* Undefined function*/
-  return ARM_DRIVER_ERROR_UNSUPPORTED ;
+  return ARM_DRIVER_ERROR_UNSUPPORTED;
 }
 
 static ARM_I2C_STATUS ARM_I2C_GetStatus (void)
@@ -769,7 +769,7 @@ static int32_t ARM_I2C_ResetAsSlave (void)
   uint32_t reg_value;
   uint8_t  cnt;
 
-  if (I2C_INITIALIZED == info->flags)
+  if (I2C_INITIALIZED == info.flags)
   {
     return ARM_DRIVER_ERROR;
   }
@@ -796,7 +796,7 @@ static int32_t ARM_I2C_ResetAsSlave (void)
     hw_reg_read32(CNF_REG_BASE, CNF_REG_NCLKCTRL);
   }
 
-  info->flags = I2C_INITIALIZED;
+  info.flags = I2C_INITIALIZED;
   return ARM_DRIVER_OK;
 }
 

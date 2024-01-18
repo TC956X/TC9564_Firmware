@@ -256,8 +256,8 @@ typedef struct GPIO_DRIVER {
 
 extern TC956X_GPIO_DRIVER tc956x_gpio;
 
-void INTI01_IRQHandler(void);
-void INTI02_IRQHandler(void);
-void INTI03_IRQHandler(void);
+void INTI01_IRQHandler (void);
+void INTI02_IRQHandler (void);
+void INTI03_IRQHandler (void);
 
 #endif /* _TC956X_GPIO_DRIVER_H_ */

@@ -46,6 +46,8 @@
 
 #define hw_reg_write32(addr_base, offset, val) *((volatile unsigned int*)((addr_base) + (offset)))=(val)
 #define hw_reg_read32(addr_base, offset) (*((volatile unsigned int*)((addr_base) + (offset))))
+#define read32(addr) (*((volatile uint32_t *)(addr)))
+#define write32(addr, data) (*((volatile uint32_t *)(addr)) = (uint32_t)data)
 
 #define TC956X_NFUNCEN0_OFFS  (0x0008U)
 #define TC956X_NFUNCEN1_OFFS  (0x1514U)
@@ -89,6 +91,7 @@
 #define TC956X_TWENTYNINE    29U
 #define TC956X_THIRTY        30U
 #define TC956X_THIRTYONE     31U
+#define TC956X_THIRTYTWO     32U
 
 #define TC956X_TWOFIFTYFIVE  255U
 
@@ -117,7 +120,7 @@ __inline static void mdelay(uint32_t ms)
 {
   unsigned int i, cnt = 0;
 
-  cnt = 187500U*ms;  /* 187.5MHz */
+  cnt = 62500U * ms; /* 250MHz --> (250000U * ms) >> 2; */
   for (i = 0U; i < cnt; i++) {
   ;
   }
@@ -128,7 +131,7 @@ __inline static void udelay(uint32_t us)
 {
   unsigned int i, cnt = 0;
 
-  cnt = 187U*us;  /* 187.5MHz: Its not an accurate usec */
+  cnt = (62U * us); /* 250MHz --> (250U * us) >> 2; */
   for (i = 0U; i < cnt; i++) {
   ;
   }

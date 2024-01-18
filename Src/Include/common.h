@@ -55,33 +55,35 @@
 #define DEF_ENABLED                       1
 #define NULL                              0
 
-#define DMA_OFFLOAD_ENABLE
+#ifndef ENABLE_MAC2MAC_BRIDGE
+#define TC956X_DMA_OFFLOAD_ENABLE
+#endif
 
 #define TC956X_COMMON_ONE                 0x00000001U
 #define TC956X_COMMON_TWO                 0x00000002U
 #define TC956X_COMMON_FOUR                0x00000004U
 #define TC956X_THOUSAND                   1000U
 
-typedef unsigned long long uint64_t ;
-typedef unsigned int uint32_t ;
-typedef int int32_t ;
-typedef unsigned char uint8_t ;
-typedef char int08_t ;
+typedef unsigned long long uint64_t;
+typedef unsigned int uint32_t;
+typedef int int32_t;
+typedef unsigned char uint8_t;
+typedef char int08_t;
 
-extern volatile uint64_t guiM3Ticks ;        /* System ticks */
+extern volatile uint64_t guiM3Ticks;        /* System ticks */
 
 /*=====================================================================
 FUNCTION PROTOTYPES
 ==================================================================== */
-void SysTick_Handler( void ) ;
+void SysTick_Handler (void);
 
-void Hw_Reg_Write32 ( const uint32_t uiAddr_base, const uint32_t uiOffset,
-                      const uint32_t uiVal ) ;
-uint32_t Hw_Reg_Read32 ( const uint32_t uiAddr_base,
-                         const uint32_t uiOffset ) ;
+void Hw_Reg_Write32 (const uint32_t uiAddr_base, const uint32_t uiOffset,
+                      const uint32_t uiVal);
+uint32_t Hw_Reg_Read32 (const uint32_t uiAddr_base,
+                         const uint32_t uiOffset);
 
-extern void WDT_IRQHandler ( void ) ;
+extern void WDT_IRQHandler (void);
 
-extern void CPU_IntEn( void ) ;
+extern void CPU_IntEn (void);
 
 #endif /* _COMMON_H__ */

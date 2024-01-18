@@ -58,7 +58,7 @@
 __inline void CM3_Errata_IRQ(void)
 {
   __schedule_barrier();
-#if defined ( __CC_ARM )
+#if defined (__CC_ARM)
   __asm{DSB};
 #endif
   __schedule_barrier();

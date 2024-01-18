@@ -47,15 +47,15 @@ INCLUDE FILES
 static function prototype declaration
 ==================================================================== */
 static ARM_DRIVER_VERSION tc956x_GPIO_GetVersion (void);
-static void tc956x_GPIO_ConfigReg(uint32_t Addr_Offs, uint32_t config, uint8_t flag);
+static void tc956x_GPIO_ConfigReg (uint32_t Addr_Offs, uint32_t config, uint8_t flag);
 static int8_t tc956x_GPIO_Initialize (void);
-static int8_t tc956x_GPIO_ConfigOutput(uint8_t gpio_pin);
-static int8_t tc956x_GPIO_ConfigInput(uint8_t gpio_pin);
-static int8_t tc956x_GPIO_OutputData(uint8_t gpio_pin, uint8_t flag);
+static int8_t tc956x_GPIO_ConfigOutput (uint8_t gpio_pin);
+static int8_t tc956x_GPIO_ConfigInput (uint8_t gpio_pin);
+static int8_t tc956x_GPIO_OutputData (uint8_t gpio_pin, uint8_t flag);
 static int8_t tc956x_GPIO_InputData (uint8_t gpio_pin);
 static int8_t tc956x_GPIO_Uninitialize (void);
-static int8_t tc956x_GPIO_CheckArgFlag( uint8_t data );
-static int8_t tc956x_GPIO_ConfigIntr(uint8_t pinNum, uint8_t config);
+static int8_t tc956x_GPIO_CheckArgFlag (uint8_t data);
+static int8_t tc956x_GPIO_ConfigIntr (uint8_t pinNum, uint8_t config);
 
 static int32_t gpio_init;
 static int8_t gpio_dir[37];
@@ -248,7 +248,7 @@ static int8_t tc956x_GPIO_Initialize (void)
   \param[in]   gpio_pin [0-36]
   \return      \ref execution_status
 */
-static int8_t tc956x_GPIO_ConfigOutput(uint8_t gpio_pin)
+static int8_t tc956x_GPIO_ConfigOutput (uint8_t gpio_pin)
 {
   uint32_t config;
   uint32_t regVal;
@@ -257,7 +257,7 @@ static int8_t tc956x_GPIO_ConfigOutput(uint8_t gpio_pin)
     return ARM_DRIVER_ERROR;
   }
 
-  if( (GPIO_TWENTY == gpio_pin) || (GPIO_TWENTYONE == gpio_pin))
+  if((GPIO_TWENTY == gpio_pin) || (GPIO_TWENTYONE == gpio_pin))
   {
     return ARM_DRIVER_ERROR_PARAMETER;
   }
@@ -282,13 +282,13 @@ static int8_t tc956x_GPIO_ConfigOutput(uint8_t gpio_pin)
   }
   if(gpio_pin < GPIO_THIRTYTWO)
   {
-    config = ~(TC956X_GPIO_ONE << gpio_pin) ;
+    config = ~(TC956X_GPIO_ONE << gpio_pin);
     regVal = hw_reg_read32(TC956X_REG_BASE, GPIO0_ENABLE);
     hw_reg_write32(TC956X_REG_BASE, GPIO0_ENABLE, regVal & config);
   }
   else
   {
-    config = ~(TC956X_GPIO_ONE << (gpio_pin - GPIO_THIRTYTWO)) ;
+    config = ~(TC956X_GPIO_ONE << (gpio_pin - GPIO_THIRTYTWO));
     regVal = hw_reg_read32(TC956X_REG_BASE, GPIO1_ENABLE);
     hw_reg_write32(TC956X_REG_BASE, GPIO1_ENABLE, regVal & config);
   }
@@ -303,7 +303,7 @@ static int8_t tc956x_GPIO_ConfigOutput(uint8_t gpio_pin)
   \param [in]  flag HIGH/LOW
   \return      \ref execution_status
 */
-static int8_t tc956x_GPIO_OutputData(uint8_t  gpio_pin, uint8_t flag)
+static int8_t tc956x_GPIO_OutputData (uint8_t  gpio_pin, uint8_t flag)
 {
   uint8_t status;
 
@@ -312,7 +312,7 @@ static int8_t tc956x_GPIO_OutputData(uint8_t  gpio_pin, uint8_t flag)
     return ARM_DRIVER_ERROR;
   }
 
-  if( (GPIO_TWENTY == gpio_pin) || (GPIO_TWENTYONE == gpio_pin))
+  if((GPIO_TWENTY == gpio_pin) || (GPIO_TWENTYONE == gpio_pin))
   {
     return ARM_DRIVER_ERROR_PARAMETER;
   }
@@ -362,7 +362,7 @@ static int8_t tc956x_GPIO_OutputData(uint8_t  gpio_pin, uint8_t flag)
   \param [in]  flag HIGH/LOW
   \return      NULL
 */
-static void tc956x_GPIO_ConfigReg(uint32_t Addr_Offs, uint32_t config, uint8_t flag)
+static void tc956x_GPIO_ConfigReg (uint32_t Addr_Offs, uint32_t config, uint8_t flag)
 {
   uint32_t data;
   data = hw_reg_read32(TC956X_REG_BASE, Addr_Offs);
@@ -383,7 +383,7 @@ static void tc956x_GPIO_ConfigReg(uint32_t Addr_Offs, uint32_t config, uint8_t f
   \param [in]  gpio_pin [0-36]
   \return      \ref execution_status
 */
-static int8_t tc956x_GPIO_ConfigInput(uint8_t gpio_pin)
+static int8_t tc956x_GPIO_ConfigInput (uint8_t gpio_pin)
 {
   uint32_t config;
   uint32_t regVal;
@@ -393,7 +393,7 @@ static int8_t tc956x_GPIO_ConfigInput(uint8_t gpio_pin)
     return ARM_DRIVER_ERROR;
   }
 
-  if( (GPIO_TWENTY == gpio_pin) || (GPIO_TWENTYONE == gpio_pin))
+  if((GPIO_TWENTY == gpio_pin) || (GPIO_TWENTYONE == gpio_pin))
   {
     return ARM_DRIVER_ERROR_PARAMETER;
   }
@@ -419,13 +419,13 @@ static int8_t tc956x_GPIO_ConfigInput(uint8_t gpio_pin)
 
   if(gpio_pin < GPIO_THIRTYTWO)
   {
-    config = (TC956X_GPIO_ONE << gpio_pin) ;
+    config = (TC956X_GPIO_ONE << gpio_pin);
     regVal = hw_reg_read32(TC956X_REG_BASE, GPIO0_ENABLE);
     hw_reg_write32(TC956X_REG_BASE, GPIO0_ENABLE, regVal | config);
   }
   else
   {
-    config = (TC956X_GPIO_ONE << (gpio_pin - GPIO_THIRTYTWO)) ;
+    config = (TC956X_GPIO_ONE << (gpio_pin - GPIO_THIRTYTWO));
     regVal = hw_reg_read32(TC956X_REG_BASE, GPIO1_ENABLE);
     hw_reg_write32(TC956X_REG_BASE, GPIO1_ENABLE, regVal | config);
   }
@@ -448,7 +448,7 @@ static int8_t tc956x_GPIO_InputData (uint8_t gpio_pin)
     return ARM_DRIVER_ERROR;
   }
 
-  if( (GPIO_TWENTY == gpio_pin) || (GPIO_TWENTYONE == gpio_pin))
+  if((GPIO_TWENTY == gpio_pin) || (GPIO_TWENTYONE == gpio_pin))
   {
     return ARM_DRIVER_ERROR_PARAMETER;
   }
@@ -494,7 +494,7 @@ static int8_t tc956x_GPIO_InputData (uint8_t gpio_pin)
   \param [in]  data Flag
   \return      \ref execution_status
 */
-static int8_t tc956x_GPIO_CheckArgFlag(uint8_t data)
+static int8_t tc956x_GPIO_CheckArgFlag (uint8_t data)
 {
   int8_t status;
   if ((data == GPIO_HIGH) || (data == GPIO_LOW))
@@ -535,7 +535,7 @@ static int8_t tc956x_GPIO_Uninitialize (void)
   \param [in]  config Enable\Disable
   \return      \ref execution_status
 */
-static int8_t tc956x_GPIO_ConfigIntr(uint8_t pinNum, uint8_t config)
+static int8_t tc956x_GPIO_ConfigIntr (uint8_t pinNum, uint8_t config)
 {
   uint32_t regVal, regVal2;
   if (gpio_init == 0)
@@ -610,7 +610,7 @@ static int8_t tc956x_GPIO_ConfigIntr(uint8_t pinNum, uint8_t config)
       regVal = pinNum;
       regVal2 = hw_reg_read32(TC956X_REG_BASE, GPIO0_ENABLE);
       hw_reg_write32 (TC956X_REG_BASE, GPIO0_ENABLE, (regVal2 | (regVal << TC956X_THIRTEEN)));
-     
+
       regVal = hw_reg_read32 (TC956X_REG_BASE, TC956X_NFUNCEN7_OFFS);
       /* Set field to 0b0000, and then set to required function value */
       regVal &= ~(MUXF_CLEAR << GPIO13_POS);
@@ -637,7 +637,7 @@ static int8_t tc956x_GPIO_ConfigIntr(uint8_t pinNum, uint8_t config)
   \brief       IRQ handler
   \return      NULL
 */
-void INTI01_IRQHandler(void)
+void INTI01_IRQHandler (void)
 {
   tc956x_GPIO_ConfigReg(EXTINTFLG_OFFS, TC956X_ONE << INTI01_POS, GPIO_HIGH);
   NVIC_ClearPendingIRQ((IRQn_Type)INT_SRC_NBR_INTI01);
@@ -649,7 +649,7 @@ void INTI01_IRQHandler(void)
   \brief       IRQ handler
   \return      NULL
 */
-void INTI02_IRQHandler(void)
+void INTI02_IRQHandler (void)
 {
   tc956x_GPIO_ConfigReg(EXTINTFLG_OFFS, TC956X_ONE << INTI02_POS, GPIO_HIGH);
   NVIC_ClearPendingIRQ((IRQn_Type)INT_SRC_NBR_INTI02);
@@ -661,7 +661,7 @@ void INTI02_IRQHandler(void)
   \brief       IRQ handler
   \return      NULL
 */
-void INTI03_IRQHandler(void)
+void INTI03_IRQHandler (void)
 {
   tc956x_GPIO_ConfigReg(EXTINTFLG_OFFS, TC956X_ONE << INTI03_POS, GPIO_HIGH);
   NVIC_ClearPendingIRQ((IRQn_Type)INT_SRC_NBR_INTI03);

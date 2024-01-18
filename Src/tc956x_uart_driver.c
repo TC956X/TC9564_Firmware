@@ -47,7 +47,7 @@
 static int32_t tc956x_UART_InterSend (uint8_t UART_id, const uint8_t *data, uint32_t length);
 static int32_t tc956x_UART_Send (const void *data, uint32_t num, uint8_t UART_id);
 static int32_t tc956x_UART_Receive (void *data, uint32_t num, uint8_t UART_id);
-static int32_t tc956x_UART_Control (uint8_t UART_id, uint32_t control, uint32_t arg );
+static int32_t tc956x_UART_Control (uint8_t UART_id, uint32_t control, uint32_t arg);
 static ARM_USART_STATUS tc956x_UART_GetStatus  (uint8_t UART_id);
 static int32_t tc956x_UART_Initialize(ARM_USART_SignalEvent_t cb_event, UART_CONFIG uart);
 static int32_t tc956x_UART_Uninitialize (uint8_t UART_id);
@@ -639,10 +639,10 @@ static int32_t tc956x_UART_Control (uint8_t UART_id, uint32_t control, uint32_t 
         if((arg <= UART_MAX_BAUD_RATE) && (arg >= UART_MIN_BAUD_RATE))
         {
           /* Set baurdrate */
-          Mclk_Freq = MCLK_FREQ_VAL ; /* UART_CLK */
-          Divider =  ( Mclk_Freq / ( TC956X_SIXTEEN * arg )); /* IBRD */
-          Remainder = Mclk_Freq % ( TC956X_SIXTEEN * arg );
-          Fraction = ( ( ( TC956X_EIGHT * Remainder ) / arg ) >> TC956X_ONE ) ; /*FBRD */
+          Mclk_Freq = MCLK_FREQ_VAL; /* UART_CLK */
+          Divider = (Mclk_Freq / (TC956X_SIXTEEN * arg)); /* IBRD */
+          Remainder = Mclk_Freq % (TC956X_SIXTEEN * arg);
+          Fraction = (((TC956X_EIGHT * Remainder) / arg) >> TC956X_ONE); /*FBRD */
           bd_rate_flag = 1;
         }
         else
@@ -819,8 +819,8 @@ static int32_t tc956x_UART_Control (uint8_t UART_id, uint32_t control, uint32_t 
   }
   if (1U == bd_rate_flag)
   {
-    hw_reg_write32( uart_base, UART_IBRD, Divider );
-    hw_reg_write32( uart_base, UART_FBRD, Fraction );
+    hw_reg_write32(uart_base, UART_IBRD, Divider);
+    hw_reg_write32(uart_base, UART_FBRD, Fraction);
     bd_rate_flag = 0;
   }
   line_control = (uint16_t)hw_reg_read32 (uart_base, UART_LCR_H);
@@ -987,22 +987,22 @@ static int32_t tc956x_UART_Initialize(ARM_USART_SignalEvent_t cb_event, UART_CON
   if(uartid == 0U)
   {
     regVal = hw_reg_read32(TC956X_REG_BASE, TC956X_NFUNCEN5_OFFS);
-    hw_reg_write32 ( TC956X_REG_BASE, TC956X_NFUNCEN5_OFFS, regVal | TC956X_UART0_ENABLE);
+    hw_reg_write32 (TC956X_REG_BASE, TC956X_NFUNCEN5_OFFS, regVal | TC956X_UART0_ENABLE);
     regVal = hw_reg_read32(TC956X_REG_BASE, TC956X_NCLKCTRL0_OFFS);
     hw_reg_write32 (TC956X_REG_BASE, TC956X_NCLKCTRL0_OFFS, regVal | TC956X_UART0_CLK_ENABLE);
     regVal = hw_reg_read32(TC956X_REG_BASE, TC956X_NRSTCTRL0_OFFS);
-    hw_reg_write32 ( TC956X_REG_BASE, TC956X_NRSTCTRL0_OFFS, regVal & ~(TC956X_UART0_CLK_ENABLE));
+    hw_reg_write32 (TC956X_REG_BASE, TC956X_NRSTCTRL0_OFFS, regVal & ~(TC956X_UART0_CLK_ENABLE));
     uart_base = UART0_REG_BASE;
     cb_event_uart_0 = cb_event;
   }
   else
   {
     regVal = hw_reg_read32(TC956X_REG_BASE, TC956X_NFUNCEN5_OFFS);
-    hw_reg_write32 ( TC956X_REG_BASE, TC956X_NFUNCEN5_OFFS, regVal | TC956X_UART1_ENABLE);
+    hw_reg_write32 (TC956X_REG_BASE, TC956X_NFUNCEN5_OFFS, regVal | TC956X_UART1_ENABLE);
     regVal = hw_reg_read32(TC956X_REG_BASE, TC956X_NCLKCTRL0_OFFS);
     hw_reg_write32 (TC956X_REG_BASE, TC956X_NCLKCTRL0_OFFS, regVal | TC956X_UART1_CLK_ENABLE);
     regVal = hw_reg_read32(TC956X_REG_BASE, TC956X_NRSTCTRL0_OFFS);
-    hw_reg_write32 ( TC956X_REG_BASE, TC956X_NRSTCTRL0_OFFS, regVal & ~(TC956X_UART1_CLK_ENABLE));
+    hw_reg_write32 (TC956X_REG_BASE, TC956X_NRSTCTRL0_OFFS, regVal & ~(TC956X_UART1_CLK_ENABLE));
     uart_base = UART1_REG_BASE;
     cb_event_uart_1 = cb_event;
   }

@@ -1,7 +1,7 @@
 /* ============================================================================
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Toshiba Electronic Devices & Storage Corporation
+ * Copyright (c) 2023 Toshiba Electronic Devices & Storage Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,8 @@
  *  VERSION     : 1.0.0
  *  23 Jul 2021  : Enable DMA IPA Offload by default
  *  VERSION     : 1.0.3
+ *  13 Feb 2023  : Disable DMA IPA Offload by default
+ *  VERSION     : 4.0.0
  */
 
 #ifndef _COMMON_H__
@@ -55,9 +57,7 @@
 #define DEF_ENABLED                       1
 #define NULL                              0
 
-#ifndef ENABLE_MAC2MAC_BRIDGE
-#define TC956X_DMA_OFFLOAD_ENABLE
-#endif
+/* #define TC956X_DMA_OFFLOAD_ENABLE */
 
 #define TC956X_COMMON_ONE                 0x00000001U
 #define TC956X_COMMON_TWO                 0x00000002U

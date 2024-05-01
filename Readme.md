@@ -1,7 +1,7 @@
 # Toshiba Electronic Devices & Storage Corporation TC956X PCIe Ethernet Bridge Firmware
 
-Release Date: Aug 10 2023
-Relase Version: V_1.1.7
+Release Date: Feb 13 2024
+Relase Version: V_4.0.0
 
 
 # Introduction:
@@ -47,8 +47,8 @@ The folder contains a Keil project, which is the firmware for PCIe interface.
 2. Firmware Version
     #define TC956X_M3_DBG_VER_START      0x2000F900 // Firmware Version SRAM area start address
 
-3. Disable DMA_OFFLOAD_ENABLE macro in \Src\Include\common.h to disable IPA feature.
-   By default, DMA_OFFLOAD_ENABLE macro is enabled
+3. By default, TC956X_DMA_OFFLOAD_ENABLE macro is disable
+   Enable TC956X_DMA_OFFLOAD_ENABLE macro in \Src\Include\common.h to enable IPA feature.
 
 # Release Versions:
 
@@ -83,4 +83,15 @@ The folder contains a Keil project, which is the firmware for PCIe interface.
 2. Corrected bit settings in ARM_I2C_Uninitialize API.
 
 ## TC956X_Linux_Firmware_PCIeBridge_20230810_V1.1.7:
-1. IPA enabled by default
+1. Merge of Automotive FW (V3.0.0) changes which are 
+ a. I2C info pointer initialised before usage
+ b. IPA feature disabled by default
+ c. Kernel timers are used to process transmitted Tx descriptors. Systick timers are not used.
+ d. IPA Support and IPA offload disabled by default
+ e. Port2Port Feature support
+2. IPA enabled by default
+
+## TC956X_Linux_Firmware_PCIeBridge_20240213_V4.0.0:
+1. IPA disable by default
+2. TC956x switch to switch connection support (upto 2 level) over DSP ports
+3. Merged CPE and Automotive package

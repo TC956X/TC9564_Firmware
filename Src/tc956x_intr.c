@@ -1,7 +1,7 @@
 /* ============================================================================
 * The MIT License (MIT)
 *
-* Copyright (c) 2020 Toshiba Electronic Devices & Storage Corporation
+* Copyright (c) 2022 Toshiba Electronic Devices & Storage Corporation
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -887,7 +887,7 @@ static void Init_mac2mac_filter (uint8_t port)
   uiRegVal = (XGMAC_BROADCAST_ADDROFF << TC956X_EIGHT) | (TC956X_ONE << TC956X_ONE) | (TC956X_ONE);
 
   Hw_Reg_Write32(uiBaseAddr, XGMAC_INDIR_ACCESS_CTRL, uiRegVal);
-  
+
   uiRegVal = Hw_Reg_Read32(uiBaseAddr, XGMAC_INDIR_ACCESS_CTRL);
   while (uiRegVal & TC956X_ONE)
   {
@@ -1199,7 +1199,7 @@ void EMAC0_TXDMA_IRQHandler (void)
 
   uiData = Hw_Reg_Read32(TC956X_INTC_REG_BASE, MAC0STATUS);
   uiMask = Hw_Reg_Read32(TC956X_INTC_REG_BASE, INTMCUMASK0_OFFS);
-  
+
   for (i = 0U; i < MAX_DMA_TX_CH; i++)
   {
     /* Skip the channels for which INTMCUMASK interrupt is masked*/
@@ -1209,7 +1209,7 @@ void EMAC0_TXDMA_IRQHandler (void)
     }
 
     if (uiData & (TC956X_ONE << i))
-    { 
+    {
       uiCurDesc = Hw_Reg_Read32( XGMAC_MAC_OFFSET0, XGMAC_DMA_CUR_TxDESC_LADDR(i) );
 
       uiIntEn = Hw_Reg_Read32(XGMAC_MAC_OFFSET0, XGMAC_DMA_Int_Enable(i));
@@ -1248,7 +1248,7 @@ void EMAC0_RXDMA_IRQHandler (void)
     }
 
     if (uiData & (TC956X_ONE << (i + MACxRXSTS_CH0)))
-    { 
+    {
       uiCurDesc = Hw_Reg_Read32( XGMAC_MAC_OFFSET0, XGMAC_DMA_CUR_RxDESC_LADDR(i) );
 
       uiIntEn = Hw_Reg_Read32(XGMAC_MAC_OFFSET0, XGMAC_DMA_Int_Enable(i));
@@ -1309,7 +1309,7 @@ void EMAC1_TXDMA_IRQHandler (void)
 
       if (uiIntSts & XGMAC_DMA_STS_TX_TI)
       {
-        *(uint32_t*)(*(uint32_t*)(SRAM_TX_PCIE_ADDR_LOC + (MAX_DMA_TX_CH * TC956X_FOUR) + (i * TC956X_FOUR))) =  
+        *(uint32_t*)(*(uint32_t*)(SRAM_TX_PCIE_ADDR_LOC + (MAX_DMA_TX_CH * TC956X_FOUR) + (i * TC956X_FOUR))) =
                                     uiCurDesc;
       }
 
@@ -1348,7 +1348,7 @@ void EMAC1_RXDMA_IRQHandler (void)
 
       if (uiIntSts & XGMAC_DMA_STS_RX_RI)
       {
-        *(uint32_t *)(*(uint32_t *)(SRAM_RX_PCIE_ADDR_LOC + (MAX_DMA_RX_CH * TC956X_FOUR) + (i * TC956X_FOUR))) =  
+        *(uint32_t *)(*(uint32_t *)(SRAM_RX_PCIE_ADDR_LOC + (MAX_DMA_RX_CH * TC956X_FOUR) + (i * TC956X_FOUR))) =
                                     uiCurDesc;
       }
 
@@ -1391,7 +1391,7 @@ void PCIeFLR_IRQHandler (void)
   uint32_t i, mac_stat, regVal, allocated_dma;
   uint32_t uiIntMask, uiIntMask_reset;
   uint32_t reg_access = 0, mask_offset = 0, mac_status = 0;
-  
+
   /* FLR interrupt mask */
   uiIntMask_reset = Hw_Reg_Read32(TC956X_INTC_REG_BASE, INTMCUMASK3_OFFS);
   Hw_Reg_Write32(TC956X_INTC_REG_BASE, INTMCUMASK3_OFFS, 0);
@@ -1461,7 +1461,7 @@ void PCIeFLR_IRQHandler (void)
 
     for (i = 0U; i < MAX_DMA_RX_CH; i++)
     {
-      if ((allocated_dma & (TC956X_ONE << i)) != TC956X_ZERO) {    
+      if ((allocated_dma & (TC956X_ONE << i)) != TC956X_ZERO) {
         if ((mac_stat & ((uint32_t)TC956X_ONE << (i + MACxRXSTS_CH0))) != TC956X_ZERO)
         {
           /* Disable Interrupt generation for the RX channel */
@@ -1478,7 +1478,7 @@ void PCIeFLR_IRQHandler (void)
         }
       }
     }
-    
+
     /* Assert reset of EMAC */
     regVal = hw_reg_read32(TC956X_REG_BASE, nrstctrl_offs);
     Hw_Reg_Write32(TC956X_REG_BASE, nrstctrl_offs, regVal | (TC956X_EMAC_RST));
@@ -1503,14 +1503,14 @@ void PCIeFLR_IRQHandler (void)
       if ((allocated_dma & (TC956X_ONE << i)) != TC956X_ZERO)
       {
         if ((mac_stat & ((uint32_t)TC956X_ONE << (i + MACxRXSTS_CH0))) != TC956X_ZERO)
-        { 
+        {
           /* Disable Interrupt generation for the RX channel */
           uiIntMask = Hw_Reg_Read32(TC956X_INTC_REG_BASE, mask_offset);
           uiIntMask  |= ((uint32_t)TC956X_ONE << (INTMCUMASK_RX_CH0 + i));
           Hw_Reg_Write32(TC956X_INTC_REG_BASE, mask_offset, uiIntMask);
         }
         if ((mac_stat & (TC956X_ONE << i)) != TC956X_ZERO)
-        { 
+        {
           /* Disable Interrupt generation for the TX channel */
           uiIntMask = Hw_Reg_Read32(TC956X_INTC_REG_BASE, mask_offset);
           uiIntMask |= ((uint32_t)TC956X_ONE << (INTMCUMASK_TX_CH0 + i));

@@ -1,7 +1,7 @@
 /* ============================================================================
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Toshiba Electronic Devices & Storage Corporation
+ * Copyright (c) 2021 Toshiba Electronic Devices & Storage Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -52,6 +52,7 @@
 MACRO DEFINITION
 ======================================================================*/
 //#define ENABLE_MAC2MAC_BRIDGE
+//#define ENABLE_SRIOV
 //#define MAC2MAC_DEBUG_INFO
 
 /* Debugging count SRAM area start address */

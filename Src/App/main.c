@@ -45,6 +45,8 @@
 *               : 2. Version Update
 *               : 3. Merged CPE and Automotive package
 *  VERSION      : 4.0.0
+*  31 May 2024  : 1. Version Update
+*  VERSION      : 5.0.0
 */
 
 /*
@@ -104,7 +106,7 @@ static void Eeprom_Mac_Read (void);
 static void SysInit (void);
 
 #if (DEF_ENABLED == TC956X_UART)
-static const FW_Version_t version = {'R', 4, 0, 0};
+static const FW_Version_t version = {'R', 5, 0, 0};
 #endif
 
 #if (DEF_ENABLED == TEST_EEPROM_WRITE_ENABLE)

@@ -1,7 +1,7 @@
 # Toshiba Electronic Devices & Storage Corporation TC956X PCIe Ethernet Bridge Firmware
 
-Release Date: Feb 13 2024
-Relase Version: V_4.0.0
+Release Date: May 31 2024
+Relase Version: V_5.0.0
 
 
 # Introduction:
@@ -95,3 +95,6 @@ The folder contains a Keil project, which is the firmware for PCIe interface.
 1. IPA disable by default
 2. TC956x switch to switch connection support (upto 2 level) over DSP ports
 3. Merged CPE and Automotive package
+
+## TC956X_Linux_Firmware_PCIeBridge_20240531_V5.0.0:
+1. Release version update

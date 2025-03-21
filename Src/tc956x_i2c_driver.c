@@ -1,7 +1,7 @@
 /* ============================================================================
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Toshiba Electronic Devices & Storage Corporation
+ * Copyright (c) 2022 Toshiba Electronic Devices & Storage Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,7 @@
 
 /*! History:
  *  22 Oct 2020 : Baselined
- *  23 Feb 2021 : Macros used for magic numbers 
+ *  23 Feb 2021 : Macros used for magic numbers
  *  VERSION     : 1.0.0
 *  10 Jun 2022  : Configure I2C slave as default mode
 *  VERSION      : 1.0.7

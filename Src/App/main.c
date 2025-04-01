@@ -1,7 +1,7 @@
 /* ============================================================================
 * The MIT License (MIT)
 *
-* Copyright (c) 2024 Toshiba Electronic Devices & Storage Corporation
+* Copyright (c) 2025 Toshiba Electronic Devices & Storage Corporation
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -47,6 +47,11 @@
 *  VERSION      : 4.0.0
 *  31 May 2024  : 1. Version Update
 *  VERSION      : 5.0.0
+*  28 Feb 2025  : 1. fw.h file updated for static type to fw_data
+*               : 2. Version Update
+*  VERSION      : 5.1.0
+*  31 Mar 2025  : 1. Version Update
+*  VERSION      : 6.0.0
 */
 
 /*
@@ -106,7 +111,7 @@ static void Eeprom_Mac_Read (void);
 static void SysInit (void);
 
 #if (DEF_ENABLED == TC956X_UART)
-static const FW_Version_t version = {'R', 5, 0, 0};
+static const FW_Version_t version = {'R', 6, 0, 0};
 #endif
 
 #if (DEF_ENABLED == TEST_EEPROM_WRITE_ENABLE)
